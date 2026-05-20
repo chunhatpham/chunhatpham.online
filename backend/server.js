@@ -523,7 +523,7 @@ app.post('/api/support', async (req, res) => {
         }
 
         res.status(200).json({ message: "Gửi hỗ trợ thành công!" });
-    } catch (error) { console.error("🔴 LỖI TẠO TICKET SUPPORT:", error); res.status(500).json({ message: "Lỗi hệ thống khi gửi hỗ trợ: " + (error.message || error) }); }
+    } catch (error) { console.error("🔴 LỖI TẠO TICKET SUPPORT:", error); res.status(500).json({ message: "Lỗi hệ thống khi gửi hỗ trợ: " + (error.message || "Unknown error") }); }
 });
 
 // ==========================================

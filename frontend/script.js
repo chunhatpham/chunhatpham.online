@@ -1264,10 +1264,14 @@ window.submitSupportTicket = async function() {
                 showNotification('success', 'Gửi Thành Công', 'Phiếu hỗ trợ đã được gửi. Chúng tôi sẽ phản hồi sớm nhất!', 'Đóng'); 
                 document.getElementById('support-name').value = ''; document.getElementById('support-email').value = ''; document.getElementById('support-content').value = ''; imgInput.value = ''; window.updateFileName(imgInput); 
             } else {
-                let errData = await res.json();
-                showNotification('error', 'Gửi Thất Bại', errData.message || 'Lỗi từ máy chủ', 'Đóng');
+                try {
+                    let errData = await res.json();
+                    showNotification('error', 'Gửi Thất Bại', errData.message || 'Lỗi không xác định từ máy chủ.', 'Đóng');
+                } catch (e) {
+                    showNotification('error', 'Gửi Thất Bại', 'Máy chủ trả về lỗi không mong muốn. Vui lòng thử lại sau.', 'Đóng');
+                }
             }
-        } catch (e) { showNotification('error', 'Lỗi Mạng', 'Lỗi kết nối máy chủ', 'Đóng'); }
+        } catch (e) { showNotification('error', 'Lỗi Mạng', 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại đường truyền.', 'Đóng'); }
     });
 };
 
