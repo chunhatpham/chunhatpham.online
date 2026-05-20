@@ -165,7 +165,8 @@ mongoose.connect(dbURI)
             
             // TÍNH NĂNG THÊM PHIM MỚI TỰ ĐỘNG (KHÔNG LÀM MẤT VIEW/LIKE CŨ)
             const newMoviesToAdd = [
-                ["Cố Gắng Kết Nối Với Em", "https://i.postimg.cc/LXBTYs5k/gen.jpg", "https://videotourl.com/audio/1779195308431-8a354d51-34d1-4673-87fb-cd40c097fcbb.m4a"],
+                ["Vợ Tôi Đã Đánh Mất Tôi", "https://i.postimg.cc/wTdbctdH/88761587-401C-4312-B820-9CB0C1503B11.jpg", "https://videotourl.com/audio/1779281108637-7c7866e4-b7f8-4ea7-b9e8-acf451483f85.mp3", "https://videotourl.com/audio/1779281189661-a4f6af97-12ed-43b1-b16d-3808a50a9e90.mp3", "https://videotourl.com/audio/1779281271960-9f7ca7c7-6594-447d-91af-5a6b36e6707b.mp3"],
+                ["Cố Gắng Kết Nối Với Em", "https://i.postimg.cc/LXBTYs5k/gen.jpg", "https://videotourl.com/audio/1779195308431-8a354d51-34d1-4673-87fb-cd40c097fcbb.m4a", "https://videotourl.com/audio/1779280333697-a25565a2-b70a-4ef9-b09f-cabe7d65980b.mp3", "https://videotourl.com/audio/1779280414769-74c0200b-8870-471a-951c-6cbd435586a6.mp3"],
                 ["Gặp Vấn Đề Khi Đi Ly Hôn", "https://i.postimg.cc/nzYkjLr4/gen.jpg", "https://videotourl.com/audio/1779195065140-7ce406e7-74e7-49fa-a4c6-d975568d07ae.mp3", "https://videotourl.com/audio/1779195115735-d8493ad9-7608-46a5-a8f1-ddab0936ad00.mp3", "https://videotourl.com/audio/1779195202462-1e3726e3-2b2d-4d80-b70e-f0c0501911ea.mp3"],
                 ["Tôi Muốn Ly Hôn Với Đại Lão", "https://i.postimg.cc/wx2293SM/69AACA28-C240-441A-84EC-3F04FDFDDA96.jpg", "https://videotourl.com/audio/1779192701252-a875996f-f6ea-47f2-ac5a-b41d6fa690f2.m4a"]
             ];
@@ -173,7 +174,8 @@ mongoose.connect(dbURI)
             newMoviesToAdd.forEach((m, idx) => {
                 const slug = m[0].normalize('NFD').replace(/[đĐ]/g, 'd').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-');
                 const filePath = path.join(moviesDir, `${slug}.json`);
-                if (!fs.existsSync(filePath)) {
+                
+                try {
                     const audio1 = m[2] || "https://files.catbox.moe/cikmvt.m4a";
                     const audio2 = m[3] || "";
                     const audio3 = m[4] || "";
@@ -188,14 +190,26 @@ mongoose.connect(dbURI)
                     if (audio4) seasonsArr.push({ seasonNumber: 4, seasonName: "Phần 4", episodes: [{ episodeNumber: 1, title: "Tập 1", audioUrl: audio4, videoUrl: "", isPremium: true }] });
                     if (audio5) seasonsArr.push({ seasonNumber: 5, seasonName: "Phần 5", episodes: [{ episodeNumber: 1, title: "Tập 1", audioUrl: audio5, videoUrl: "", isPremium: true }] });
 
-                    const movieObj = {
-                        slug: slug, title: m[0], coverImg: m[1], tag: "HOT", description: "Vừa ra mắt",
-                        views: Math.floor(Math.random() * 5000) + 1000, likes: Math.floor(Math.random() * 500) + 100,
-                        uploadOrder: Date.now() + 2000000 - (idx * 1000), // Cộng thêm mốc thời gian lớn để luôn đứng Top 1
-                        seasons: seasonsArr
-                    };
+                    let movieObj;
+                    if (fs.existsSync(filePath)) {
+                        // File đã tồn tại, đọc và cập nhật các phần mới
+                        const rawData = fs.readFileSync(filePath);
+                        movieObj = JSON.parse(rawData);
+                        movieObj.seasons = seasonsArr;
+                        console.log(`🔄 ĐÃ CẬP NHẬT CÁC PHẦN MỚI CHO PHIM: ${m[0]}`);
+                    } else {
+                        // File chưa tồn tại, tạo mới hoàn toàn
+                        movieObj = {
+                            slug: slug, title: m[0], coverImg: m[1], tag: "HOT", description: "Vừa ra mắt",
+                            views: Math.floor(Math.random() * 5000) + 1000, likes: Math.floor(Math.random() * 500) + 100,
+                            uploadOrder: Date.now() + 2000000 - (idx * 1000), // Cộng thêm mốc thời gian lớn để luôn đứng Top 1
+                            seasons: seasonsArr
+                        };
+                        console.log(`🎬 ĐÃ THÊM PHIM MỚI VÀO HỆ THỐNG: ${m[0]}`);
+                    }
                     fs.writeFileSync(filePath, JSON.stringify(movieObj, null, 4), 'utf-8');
-                    console.log(`🎬 ĐÃ THÊM PHIM MỚI VÀO HỆ THỐNG: ${m[0]}`);
+                } catch (e) {
+                    console.error(`🔴 Lỗi xử lý phim "${m[0]}":`, e.message);
                 }
             });
 
