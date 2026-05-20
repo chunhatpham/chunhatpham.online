@@ -767,6 +767,14 @@ app.put('/api/admin/user/:username', async (req, res) => {
     } catch (error) { res.status(500).json({ message: "Lỗi hệ thống!" }); }
 });
 
+app.get('/api/admin/tickets', async (req, res) => {
+    try {
+        // Bỏ sắp xếp ở đây để tránh lỗi do dữ liệu cũ/hỏng. Sẽ sắp xếp ở Frontend.
+        const tickets = await Ticket.find();
+        res.status(200).json(tickets);
+    } catch (error) { res.status(500).json({ message: "Lỗi lấy danh sách hỗ trợ" }); }
+});
+
 app.post('/api/admin/ticket/reply', async (req, res) => {
     try {
         const { ticketId, replyContent } = req.body;
