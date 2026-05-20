@@ -287,7 +287,7 @@ window.showAdProgressToast = function(currentStep) {
     countText.innerText = `${currentStep}/${MAX_AD_CLICKS}`;
 
     if (currentStep < MAX_AD_CLICKS) {
-        desc.innerText = `Đang chuyển hướng... Vui lòng quay lại và bấm vào phim thêm ${MAX_AD_CLICKS - currentStep} lần nữa!`;
+        desc.innerText = `Bạn hãy bấm đủ ${MAX_AD_CLICKS} lần để mở bộ phim lên nhá, nếu không muốn quảng cáo có thể mua gói tắt quảng cáo hoặc lên Premium nhé (còn ${MAX_AD_CLICKS - currentStep} lần).`;
         desc.style.color = "#f5c518";
         icon.className = "fas fa-hand-pointer";
         iconBox.style.background = "linear-gradient(135deg, #f5c518, #ff9800)";
@@ -302,7 +302,7 @@ window.showAdProgressToast = function(currentStep) {
 
     toast.classList.add('show');
     clearTimeout(window.adToastTimer);
-    window.adToastTimer = setTimeout(() => { closeAdToast(); }, currentStep === MAX_AD_CLICKS ? 3000 : 4000);
+    window.adToastTimer = setTimeout(() => { closeAdToast(); }, currentStep === MAX_AD_CLICKS ? 3000 : 6000);
 };
 
 window.closeAdToast = function() {
@@ -315,6 +315,46 @@ window.currentPlayingVideo = "https://example.com/link-video-vip-cua-ban";
 window.currentMovieSlug = ""; // Lưu trữ phim hiện tại để bấm like/chia sẻ
 
 window.openPlayer = function(movieSlug) {
+    // --- HỆ THỐNG YÊU CẦU CLICK QUẢNG CÁO ĐỂ MỞ KHÓA ---
+    let currentUser = JSON.parse(localStorage.getItem('cnp_current_user'));
+    let isVip = currentUser && currentUser.isPremium;
+    let hasNoAdsPack = currentUser && currentUser.noAdsExpiry && (new Date(currentUser.noAdsExpiry) > new Date());
+    let bypassAds = isVip || hasNoAdsPack;
+
+    if (!bypassAds && window.adUnlockStep < MAX_AD_CLICKS) {
+        const adLinks = [
+            "https://vt.tiktok.com/ZS9eQnVNkWqrH-NDwQg/",
+            "https://vt.tiktok.com/ZS9eQnpk1jcTU-0sAGn/",
+            "https://vt.tiktok.com/ZS9eQntSfgCqA-VUA7g/",
+            "https://vt.tiktok.com/ZS9RdMkvcsYJR-5XXqs/",
+            "https://vt.tiktok.com/ZS9RdMDFCcqDr-Wkvnr/",
+            "https://vt.tiktok.com/ZS9RdM5HDghE3-elmmE/",
+            "https://vt.tiktok.com/ZS9RdMaACXLWq-W52rL/",
+            "https://vt.tiktok.com/ZS9RdMQDJELpG-ro8Sc/",
+            "https://vt.tiktok.com/ZS9RdMqtxbCqJ-sPyPM/",
+            "https://vt.tiktok.com/ZS9RdMnUbwUyf-ajbD7/",
+            "https://vt.tiktok.com/ZS9RdMWyakByQ-0Uozs/",
+            "https://vt.tiktok.com/ZS9RdMTBSXFH1-4eGKd/",
+            "https://vt.tiktok.com/ZS989E7k8ANFf-FKqU9/",
+            "https://vt.tiktok.com/ZS989ETLJpFgc-muMiW/",
+            "https://vt.tiktok.com/ZS98nGsEU2MW9-bnMez/",
+            "https://vt.tiktok.com/ZS98nG7KYH7nH-tGp2g/",
+            "https://vt.tiktok.com/ZS983jmkcJ5Yv-HhrHa/",
+            "https://vt.tiktok.com/ZS983jxss8YFG-ncouM/"
+        ];
+        
+        window.adUnlockStep++;
+        window.showAdProgressToast(window.adUnlockStep); 
+        
+        let randomAdUrl = adLinks[Math.floor(Math.random() * adLinks.length)];
+        window.open(randomAdUrl, '_blank');
+
+        if (window.adUnlockStep < MAX_AD_CLICKS) return; 
+    }
+    
+    // Xóa bộ đếm để lần sau bấm phim khác lại yêu cầu quảng cáo từ đầu
+    window.adUnlockStep = 0;
+
     window.currentMovieSlug = movieSlug;
     // Tìm thông tin phim chuẩn từ Database (Tương thích cả click theo Slug lẫn Title)
     let movie = window.realMoviesDatabase.find(m => m.slug === movieSlug || m.title === movieSlug);
@@ -366,8 +406,6 @@ window.openPlayer = function(movieSlug) {
     }
     document.getElementById('lm-seasons-container').innerHTML = seasonsHtml;
 
-    let currentUser = JSON.parse(localStorage.getItem('cnp_current_user'));
-    let isVip = currentUser && currentUser.isPremium;
 
     document.getElementById('link-modal-overlay').classList.add('show');
     setTimeout(() => { addHistoryEntry('watch', movieTitle, 'Đã xem', 0, movieImg); }, 50);
@@ -420,32 +458,6 @@ window.playAudioSeason = function(audioUrl, title, cover, isPremiumReq) {
         return;
     }
 
-    // 3. HỆ THỐNG QUẢNG CÁO & MỞ KHÓA
-    let hasNoAdsPack = currentUser && currentUser.noAdsExpiry && (new Date(currentUser.noAdsExpiry) > new Date());
-    let bypassAds = isVip || hasNoAdsPack;
-
-    if (!bypassAds && window.adUnlockStep < MAX_AD_CLICKS) {
-        const adLinks = [
-            "https://vt.tiktok.com/ZS9eQnVNkWqrH-NDwQg/",
-            "https://vt.tiktok.com/ZS9eQnpk1jcTU-0sAGn/",
-            "https://vt.tiktok.com/ZS9eQntSfgCqA-VUA7g/",
-            "https://vt.tiktok.com/ZS9RdMkvcsYJR-5XXqs/",
-            "https://vt.tiktok.com/ZS9RdMDFCcqDr-Wkvnr/",
-            "https://vt.tiktok.com/ZS9RdM5HDghE3-elmmE/"
-        ];
-        
-        window.adUnlockStep++;
-        window.showAdProgressToast(window.adUnlockStep); 
-        
-        let randomAdUrl = adLinks[Math.floor(Math.random() * adLinks.length)];
-        window.open(randomAdUrl, '_blank');
-
-        if (window.adUnlockStep < MAX_AD_CLICKS) return; 
-    }
-    
-    // Xóa bộ đếm để lần sau bấm phim khác lại yêu cầu quảng cáo
-    window.adUnlockStep = 0;
-
     // 4. PHÁT NHẠC
     if(audioUrl && audioUrl.startsWith("http")) {
         window.executeWithLoading(() => {
@@ -461,6 +473,8 @@ window.playAudioSeason = function(audioUrl, title, cover, isPremiumReq) {
             
             // Hiển thị thanh Player dưới đáy
             document.getElementById('bottom-music-player').classList.add('show');
+            let installBanner = document.getElementById('app-install-banner');
+            if(installBanner && installBanner.style.display !== 'none') installBanner.style.bottom = window.innerWidth <= 768 ? '180px' : '130px';
             setTimeout(() => { togglePlayPause(); }, 300);
         }, 600);
     } else {
@@ -471,6 +485,8 @@ window.playAudioSeason = function(audioUrl, title, cover, isPremiumReq) {
 window.closeAudioPlayer = function() {
     document.getElementById('bottom-music-player').classList.remove('show');
     webAudio.pause(); 
+    let installBanner = document.getElementById('app-install-banner');
+    if(installBanner && installBanner.style.display !== 'none') installBanner.style.bottom = '20px';
 };
 
 function formatTime(seconds) {

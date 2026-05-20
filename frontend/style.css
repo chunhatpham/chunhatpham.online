@@ -29,6 +29,11 @@ header { position: fixed; top: 0; width: 100%; display: flex; justify-content: s
 .notif-msg { color: #aaa; font-size: 12.5px; line-height: 1.4; }
 .notif-time { color: #666; font-size: 11px; text-align: right; }
 
+@media (max-width: 450px) {
+    .notif-panel { width: 280px; right: -80px; }
+    .notif-panel::before { right: 85px; }
+}
+
 /* NÚT TẮT QUẢNG CÁO TRÊN HEADER */
 .header-no-ads-btn { position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: rgba(229, 9, 20, 0.1); border: 1px solid rgba(229, 9, 20, 0.4); transition: 0.3s; margin-right: 5px; }
 .header-no-ads-btn i { font-size: 16px; color: #ff4e00; transition: 0.3s; z-index: 1; }
@@ -43,6 +48,25 @@ header { position: fixed; top: 0; width: 100%; display: flex; justify-content: s
 .logo-forge-wrapper { position: relative; width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), #ffd700, #ff4e00, var(--primary-color)); background-size: 300% 300%; display: flex; justify-content: center; align-items: center; margin-right: 12px; animation: forgeGlowAnim 4s linear infinite; box-shadow: 0 0 10px rgba(229, 9, 20, 0.3); }
 .custom-img-logo { width: 36px; height: 36px; object-fit: cover; border-radius: 50%; border: 2px solid #0b0b0c; position: relative; z-index: 2; }
 @keyframes forgeGlowAnim { 0% { background-position: 0% 50%; box-shadow: 0 0 5px rgba(229, 9, 20, 0.4); } 50% { background-position: 100% 50%; box-shadow: 0 0 15px rgba(255, 215, 0, 0.6); } 100% { background-position: 200% 50%; box-shadow: 0 0 5px rgba(229, 9, 20, 0.4); } }
+
+/* RESPONSIVE HEADER CHO MOBILE & TABLET */
+@media (max-width: 768px) {
+    header { padding: 12px 15px; }
+    .logo-forge-wrapper { width: 36px; height: 36px; margin-right: 8px; }
+    .custom-img-logo { width: 30px; height: 30px; }
+    .logo-text { font-size: 20px; }
+    .header-right { gap: 15px; font-size: 24px; }
+    .header-no-ads-btn { width: 32px; height: 32px; margin-right: 0; }
+    .header-no-ads-btn i { font-size: 14px; }
+    .header-no-ads-btn .ban-line { width: 18px; }
+    .search-container-wrapper { top: 65px; padding: 0 15px; }
+    .page-padding { padding-top: 140px; }
+}
+
+@media (max-width: 400px) {
+    .logo-text { display: none; } /* Ẩn chữ logo trên màn hình quá nhỏ để tránh vỡ thanh công cụ */
+    .header-right { gap: 12px; }
+}
 
 /* ================= 2. TÌM KIẾM ================= */
 .search-container-wrapper { position: fixed; top: 75px; width: 100%; display: flex; justify-content: center; padding: 0 5%; z-index: 999; }
@@ -115,7 +139,7 @@ header { position: fixed; top: 0; width: 100%; display: flex; justify-content: s
 .search-tooltip::after { content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); border-width: 5px 5px 0; border-style: solid; border-color: #00e676 transparent transparent transparent; }
 
 /* ================= 5. GIAO DIỆN MODAL XEM PHIM (Link Modal) ================= */
-.link-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 9900; display: none; justify-content: center; align-items: center; opacity: 0; transition: 0.3s; padding: 20px; }
+.link-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 10005; display: none; justify-content: center; align-items: center; opacity: 0; transition: 0.3s; padding: 20px; }
 .link-modal-overlay.show { display: flex; opacity: 1; }
 .link-modal-box { background: linear-gradient(135deg, #141416, #0b0b0c); width: 100%; max-width: 850px; max-height: 90vh; border-radius: 20px; border: 1px solid rgba(229, 9, 20, 0.3); padding: 30px; box-shadow: 0 15px 50px rgba(0,0,0,0.9), inset 0 0 30px rgba(229, 9, 20, 0.05); transform: scale(0.9); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; overflow-y: auto; }
 .link-modal-box::-webkit-scrollbar { width: 5px; } .link-modal-box::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 5px; }
@@ -158,9 +182,10 @@ header { position: fixed; top: 0; width: 100%; display: flex; justify-content: s
 .btn-alm-premium { background: linear-gradient(45deg, #e50914, #ff4e00); color: white; border: none; padding: 8px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(229, 9, 20, 0.3); }
 .btn-alm-premium:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(229, 9, 20, 0.5); filter: brightness(1.1); }
 
-/* Điều chỉnh X Khung Phim để dễ bấm trên Mobile */
-.link-modal-box .modal-close-icon { top: 20px; right: 20px; width: 38px; height: 38px; font-size: 20px; z-index: 100; background: rgba(229, 9, 20, 0.15); border: 1px solid rgba(229, 9, 20, 0.3); }
-.link-modal-box .modal-close-icon:hover { background: #e50914; }
+/* Điều chỉnh nút X Khung Phim luôn nổi trên màn hình, không bị trôi khi cuộn */
+.link-modal-overlay > .modal-close-icon { position: absolute; top: 25px; right: 25px; width: 42px; height: 42px; font-size: 22px; z-index: 9999; background: rgba(0, 0, 0, 0.8); border: 2px solid #e50914; color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 0 15px rgba(229,9,20,0.5); transition: 0.3s; cursor: pointer; }
+.link-modal-overlay > .modal-close-icon:hover { background: #e50914; transform: rotate(90deg) scale(1.1); }
+@media (max-width: 768px) { .link-modal-overlay > .modal-close-icon { top: 15px; right: 15px; width: 36px; height: 36px; font-size: 16px; } .link-modal-box { margin-top: 50px; max-height: calc(100vh - 80px); } }
 
 /* ================= 6. VÍ & TÀI KHOẢN ================= */
 .global-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 10010; display: none; justify-content: center; align-items: center; opacity: 0; transition: 0.3s; } .global-modal-overlay.show { display: flex; opacity: 1; }
@@ -510,7 +535,7 @@ header { position: fixed; top: 0; width: 100%; display: flex; justify-content: s
 @keyframes slideInRightBounce { 0% { transform: translateX(120%); opacity: 0; } 60% { transform: translateX(-15px); opacity: 1; } 80% { transform: translateX(10px); } 100% { transform: translateX(0); opacity: 1; } }
 @keyframes slideOutRight { to { transform: translateX(120%); opacity: 0; } }
 @keyframes sweepLight { 0% { left: -100%; } 20% { left: 200%; } 100% { left: 200%; } }
-@media (max-width: 768px) { #top-right-event-banner { top: 80px; right: 10px; max-width: 180px; } .event-banner-label { font-size: 9px; padding: 2px 10px; } }
+@media (max-width: 768px) { #top-right-event-banner { top: 130px; right: 10px; max-width: 180px; } .event-banner-label { font-size: 9px; padding: 2px 10px; } }
 
 /* ================= 14. PREMIUM MODAL ================= */
 .premium-hero-btn { padding: 15px 30px; font-size: 16px; font-weight: 900; border: none; border-radius: 30px; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 10px; text-transform: uppercase; margin-top: 15px; background: linear-gradient(45deg, #f5c518, #ff9800); color: #000; box-shadow: 0 5px 20px rgba(245, 197, 24, 0.5); animation: pulseGold 2s infinite; }
@@ -615,7 +640,7 @@ header { position: fixed; top: 0; width: 100%; display: flex; justify-content: s
 .top-welcome-toast.show { top: 20px; }
 
 /* ================= 20. TRÌNH PHÁT NHẠC DƯỚI ĐÁY MÀN HÌNH (GLOBAL) ================= */
-.bottom-music-player { position: fixed; bottom: -150px; left: 50%; transform: translateX(-50%); width: 96%; max-width: 1000px; height: 95px; background: linear-gradient(135deg, rgba(20, 20, 25, 0.95), rgba(10, 10, 15, 0.98)); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; z-index: 10001; display: flex; justify-content: space-between; align-items: center; padding: 0 25px; box-shadow: 0 15px 40px rgba(0,0,0,0.9), 0 0 20px rgba(0, 0, 0, 0.5); transition: bottom 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.bottom-music-player { position: fixed; bottom: -150px; left: 50%; transform: translateX(-50%); width: 96%; max-width: 1000px; height: 95px; background: linear-gradient(135deg, rgba(20, 20, 25, 0.95), rgba(10, 10, 15, 0.98)); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; z-index: 10006; display: flex; justify-content: space-between; align-items: center; padding: 0 25px; box-shadow: 0 15px 40px rgba(0,0,0,0.9), 0 0 20px rgba(0, 0, 0, 0.5); transition: bottom 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 .bottom-music-player.show { bottom: 25px; }
 
 .bmp-left { display: flex; align-items: center; gap: 15px; width: 320px; }
@@ -646,15 +671,16 @@ header { position: fixed; top: 0; width: 100%; display: flex; justify-content: s
 .bmp-close-btn:hover { background: #e50914; color: white; transform: rotate(90deg); }
 
 @media (max-width: 768px) {
-    .bottom-music-player { height: auto; flex-direction: column; padding: 15px; width: 92%; bottom: -200px; }
+    .bottom-music-player { height: auto; flex-direction: column; padding: 15px 15px 20px 15px; width: 92%; bottom: -200px; gap: 15px; }
     .bottom-music-player.show { bottom: 20px; }
-    .bmp-left { width: 100%; justify-content: flex-start; margin-bottom: 10px; }
-    .bmp-info h4 { max-width: 220px; text-align: left; font-size: 16px; }
-    .bmp-info p { text-align: left; font-size: 13px; }
-    .bmp-center { width: 100%; max-width: 100%; margin-top: 5px; gap: 15px; }
+    .bmp-left { width: 100%; padding-right: 120px; justify-content: flex-start; margin-bottom: 0; }
+    .bmp-info h4 { max-width: 100%; text-align: left; font-size: 14.5px; }
+    .bmp-info p { text-align: left; font-size: 12px; }
+    .bmp-center { width: 100%; max-width: 100%; margin-top: 0; gap: 15px; }
     .bmp-controls { gap: 40px; }
-    .bmp-right { position: absolute; top: 15px; right: 15px; width: auto; gap: 15px; }
-    .bmp-close-btn { margin-left: 0; width: 32px; height: 32px; font-size: 16px; }
+    .bmp-right { position: absolute; top: 12px; right: 12px; width: auto; gap: 10px; background: rgba(0,0,0,0.7); padding: 5px 8px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
+    .bmp-close-btn { margin-left: 0; width: 28px; height: 28px; font-size: 14px; }
+    .bmp-text-btn { padding: 4px 8px; font-size: 12px; }
 }
 
 /* ================= 21. ADMIN PANEL ================= */
