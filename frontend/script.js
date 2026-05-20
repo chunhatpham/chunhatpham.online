@@ -1349,24 +1349,29 @@ window.switchAdminTab = function(tabId) {
 };
 
 window.loadAdminData = async function() {
+    // Tải và render User trước tiên, vì đây là tab mặc định và quan trọng nhất
     try {
-        const [usersRes, txsRes, tksRes] = await Promise.all([
-            fetch('https://chunhatpham-online.onrender.com/api/admin/users'), fetch('https://chunhatpham-online.onrender.com/api/admin/transactions'), fetch('https://chunhatpham-online.onrender.com/api/admin/tickets')
-        ]);
-        const users = await usersRes.json(); const txs = await txsRes.json(); const tks = await tksRes.json();
-        
-        // CẬP NHẬT THỐNG KÊ (STATS)
+        const usersRes = await fetch('https://chunhatpham-online.onrender.com/api/admin/users');
+        if (!usersRes.ok) throw new Error(`Server responded with ${usersRes.status}`);
+        const users = await usersRes.json();
         document.getElementById('stat-total-users').innerText = users.length.toLocaleString('vi-VN');
-        let totalRevenue = txs.filter(t => t.status === 'success' && t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
-        document.getElementById('stat-total-revenue').innerText = totalRevenue.toLocaleString('vi-VN') + 'đ';
-        let pendingCount = tks.filter(t => t.status === 'pending').length;
-        document.getElementById('stat-pending-tickets').innerText = pendingCount;
-
-        // TAB 1: Render Users
         window.adminLoadedUsers = users;
         window.renderAdminUsers(users);
+    } catch (e) {
+        console.error("Lỗi tải danh sách người dùng:", e);
+        document.getElementById('admin-user-tbody').innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 30px; color: #ff4e00;">Lỗi tải danh sách người dùng. Vui lòng kiểm tra lại Server hoặc đường truyền.</td></tr>';
+    }
 
-        // TAB 2: Render Transactions
+    // Tải các dữ liệu còn lại một cách độc lập để không làm ảnh hưởng đến nhau
+    // Tải Giao dịch
+    try {
+        const txsRes = await fetch('https://chunhatpham-online.onrender.com/api/admin/transactions');
+        if (!txsRes.ok) throw new Error(`Server responded with ${txsRes.status}`);
+        const txs = await txsRes.json();
+        
+        let totalRevenue = txs.filter(t => t.status === 'success' && t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
+        document.getElementById('stat-total-revenue').innerText = totalRevenue.toLocaleString('vi-VN') + 'đ';
+        
         const deposits = txs.filter(t => t.amount > 0);
         const spends = txs.filter(t => t.amount < 0);
 
@@ -1378,13 +1383,26 @@ window.loadAdminData = async function() {
 
         let spendHtml = spends.map(t => {
             let d = new Date(t.createdAt).toLocaleString('vi-VN');
-            let absAmount = Math.abs(t.amount); // Chuyển số âm thành số dương để hiển thị cho đẹp
+            let absAmount = Math.abs(t.amount);
             return `<tr><td>${d}</td><td style="color:#888; font-family: monospace;">${t.referenceCode}</td><td style="color:#ff4e00; font-weight:bold; font-size:16px;">- ${absAmount.toLocaleString('vi-VN')}đ</td><td style="color:#f5c518;">${t.content}</td></tr>`;
         }).join('');
         document.getElementById('admin-tx-spend-tbody').innerHTML = spendHtml || '<tr><td colspan="4" style="text-align:center; padding: 30px; color:#888;">Chưa có giao dịch tiêu tiền.</td></tr>';
+    } catch (e) {
+        console.error("Lỗi tải giao dịch:", e);
+        document.getElementById('admin-tx-deposit-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 30px; color: #ff4e00;">Lỗi tải lịch sử giao dịch.</td></tr>';
+        document.getElementById('admin-tx-spend-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 30px; color: #ff4e00;">Lỗi tải lịch sử giao dịch.</td></tr>';
+    }
 
-        // TAB 3: Render Tickets (Phân loại)
-        window.adminLoadedTickets = tks; // Lưu tạm để truy xuất khi bấm nút Trả lời
+    // Tải Phiếu hỗ trợ
+    try {
+        const tksRes = await fetch('https://chunhatpham-online.onrender.com/api/admin/tickets');
+        if (!tksRes.ok) throw new Error(`Server responded with ${tksRes.status}`);
+        const tks = await tksRes.json();
+
+        let pendingCount = tks.filter(t => t.status === 'pending').length;
+        document.getElementById('stat-pending-tickets').innerText = pendingCount;
+        
+        window.adminLoadedTickets = tks;
         const pendingTickets = tks.filter(t => t.status === 'pending');
         const repliedTickets = tks.filter(t => t.status !== 'pending');
         
@@ -1395,8 +1413,11 @@ window.loadAdminData = async function() {
 
         let repliedHtml = repliedTickets.map(tk => `<tr><td><strong style="color:white;">${tk.username}</strong><br><span style="font-size:11px;color:#aaa;">${tk.email}</span></td><td>${new Date(tk.createdAt).toLocaleString('vi-VN')}</td><td><span style="color:#00e676;">Đã trả lời</span></td><td><button class="btn-admin-action" style="background:#444; color:white;" onclick="openAdminReplyModal('${tk._id}')"><i class="fas fa-eye"></i> Xem Lại</button></td></tr>`).join('');
         document.getElementById('admin-ticket-replied-tbody').innerHTML = repliedHtml || '<tr><td colspan="4" style="padding: 30px; text-align: center; color: #888;">Chưa có phiếu nào được xử lý.</td></tr>';
-
-    } catch(err) { console.error("Admin load error", err); }
+    } catch (e) {
+        console.error("Lỗi tải phiếu hỗ trợ:", e);
+        document.getElementById('admin-ticket-pending-tbody').innerHTML = '<tr><td colspan="4" style="padding: 30px; text-align: center; color: #ff4e00;">Lỗi tải phiếu hỗ trợ.</td></tr>';
+        document.getElementById('admin-ticket-replied-tbody').innerHTML = '<tr><td colspan="4" style="padding: 30px; text-align: center; color: #ff4e00;">Lỗi tải phiếu hỗ trợ.</td></tr>';
+    }
 };
 
 // Hàm Render và Lọc Danh Sách Người Dùng
