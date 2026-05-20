@@ -1264,14 +1264,21 @@ window.submitSupportTicket = async function() {
                 showNotification('success', 'Gửi Thành Công', 'Phiếu hỗ trợ đã được gửi. Chúng tôi sẽ phản hồi sớm nhất!', 'Đóng'); 
                 document.getElementById('support-name').value = ''; document.getElementById('support-email').value = ''; document.getElementById('support-content').value = ''; imgInput.value = ''; window.updateFileName(imgInput); 
             } else {
+                // Cải thiện báo lỗi: Cố gắng lấy thông báo lỗi chi tiết từ server
+                let errorMessage = `Lỗi máy chủ (Mã: ${res.status}).`;
                 try {
-                    let errData = await res.json();
-                    showNotification('error', 'Gửi Thất Bại', errData.message || 'Lỗi không xác định từ máy chủ.', 'Đóng');
-                } catch (e) {
-                    showNotification('error', 'Gửi Thất Bại', 'Máy chủ trả về lỗi không mong muốn. Vui lòng thử lại sau.', 'Đóng');
+                    const errorData = await res.json();
+                    errorMessage = errorData.message || JSON.stringify(errorData);
+                } catch (jsonError) {
+                    // Nếu server sập và trả về HTML, sẽ không parse được JSON
+                    errorMessage = "Máy chủ không phản hồi đúng định dạng. Vui lòng thử lại sau ít phút.";
                 }
+                showNotification('error', 'Gửi Thất Bại', errorMessage, 'Đóng');
             }
-        } catch (e) { showNotification('error', 'Lỗi Mạng', 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại đường truyền.', 'Đóng'); }
+        } catch (e) { 
+            console.error("Lỗi mạng khi gửi phiếu:", e);
+            showNotification('error', 'Lỗi Mạng', 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại đường truyền.', 'Đóng'); 
+        }
     });
 };
 
@@ -1402,7 +1409,10 @@ window.loadAdminData = async function() {
     try {
         const tksRes = await fetch('https://chunhatpham-online.onrender.com/api/admin/tickets');
         if (!tksRes.ok) throw new Error(`Server responded with ${tksRes.status}`);
-        window.adminFullData.tickets = await tksRes.json();
+        let rawTickets = await tksRes.json();
+        // Sắp xếp ở đây để đảm bảo an toàn, ngay cả khi có dữ liệu cũ bị lỗi ngày tháng
+        rawTickets.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+        window.adminFullData.tickets = rawTickets;
         
         window.adminLoadedTickets = window.adminFullData.tickets; // Tương thích code cũ
         // Lọc thông minh hơn để tránh lỗi dữ liệu cũ
