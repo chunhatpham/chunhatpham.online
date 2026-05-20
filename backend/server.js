@@ -511,15 +511,19 @@ app.post('/api/support', async (req, res) => {
         const { username, name, email, content, image } = req.body;
         
         // 1. Lưu vào Database cho Admin xem trên Web
-        const newTicket = new Ticket({ username, name, email, content, image });
+        const newTicket = new Ticket({ username, name, email, content, image, status: 'pending' });
         await newTicket.save();
 
-        // 2. Gửi Email thật về hộp thư của Admin
-        const mailOptions = { from: '"Hệ thống ChuNhatPham" <changdinhanh@gmail.com>', to: 'changdinhanh@gmail.com', subject: `[CẦN HỖ TRỢ] Từ người dùng: ${name}`, html: `<h3>Có một yêu cầu hỗ trợ mới trên Web:</h3><p><strong>Tài khoản:</strong> ${username}</p><p><strong>Họ tên/Liên hệ:</strong> ${name}</p><p><strong>Email cung cấp:</strong> ${email}</p><p><strong>Nội dung:</strong><br/>${content}</p><br/><p><i>* Đăng nhập vào trang Admin trên Web để xem ảnh và trả lời khách hàng.</i></p>`, attachments: image ? [{ filename: 'Loi_Minh_Hoa.png', path: image }] : [] };
-        await transporter.sendMail(mailOptions);
+        // 2. Gửi Email thật về hộp thư của Admin (Đã bọc lớp bảo vệ chống sập)
+        try {
+            const mailOptions = { from: '"Hệ thống ChuNhatPham" <changdinhanh@gmail.com>', to: 'changdinhanh@gmail.com', subject: `[CẦN HỖ TRỢ] Từ người dùng: ${name}`, html: `<h3>Có một yêu cầu hỗ trợ mới trên Web:</h3><p><strong>Tài khoản:</strong> ${username}</p><p><strong>Họ tên/Liên hệ:</strong> ${name}</p><p><strong>Email cung cấp:</strong> ${email}</p><p><strong>Nội dung:</strong><br/>${content}</p><br/><p><i>* Đăng nhập vào trang Admin trên Web để xem ảnh và trả lời khách hàng.</i></p>`, attachments: image ? [{ filename: 'Loi_Minh_Hoa.png', path: image }] : [] };
+            await transporter.sendMail(mailOptions);
+        } catch (mailErr) {
+            console.log("🟡 Lỗi gửi Email báo Admin (Nhưng vé hỗ trợ vẫn được lưu vào Web an toàn):", mailErr.message);
+        }
 
         res.status(200).json({ message: "Gửi hỗ trợ thành công!" });
-    } catch (error) { console.error(error); res.status(500).json({ message: "Lỗi hệ thống khi gửi hỗ trợ!" }); }
+    } catch (error) { console.error("🔴 LỖI TẠO TICKET SUPPORT:", error); res.status(500).json({ message: "Lỗi hệ thống khi gửi hỗ trợ: " + (error.message || error) }); }
 });
 
 // ==========================================

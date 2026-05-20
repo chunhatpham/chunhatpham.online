@@ -1263,8 +1263,11 @@ window.submitSupportTicket = async function() {
             if(res.ok) {
                 showNotification('success', 'Gửi Thành Công', 'Phiếu hỗ trợ đã được gửi. Chúng tôi sẽ phản hồi sớm nhất!', 'Đóng'); 
                 document.getElementById('support-name').value = ''; document.getElementById('support-email').value = ''; document.getElementById('support-content').value = ''; imgInput.value = ''; window.updateFileName(imgInput); 
+            } else {
+                let errData = await res.json();
+                showNotification('error', 'Gửi Thất Bại', errData.message || 'Lỗi từ máy chủ', 'Đóng');
             }
-        } catch (e) { showNotification('error', 'Lỗi', 'Lỗi kết nối máy chủ', 'Đóng'); }
+        } catch (e) { showNotification('error', 'Lỗi Mạng', 'Lỗi kết nối máy chủ', 'Đóng'); }
     });
 };
 
@@ -1398,15 +1401,16 @@ window.loadAdminData = async function() {
         window.adminFullData.tickets = await tksRes.json();
         
         window.adminLoadedTickets = window.adminFullData.tickets; // Tương thích code cũ
-        const pendingTickets = window.adminFullData.tickets.filter(t => t.status === 'pending');
-        const repliedTickets = window.adminFullData.tickets.filter(t => t.status !== 'pending');
+        // Lọc thông minh hơn để tránh lỗi dữ liệu cũ
+        const pendingTickets = window.adminFullData.tickets.filter(t => t.status === 'pending' || !t.status);
+        const repliedTickets = window.adminFullData.tickets.filter(t => t.status && t.status !== 'pending');
         
         document.getElementById('pending-tickets-badge').innerText = pendingTickets.length;
 
-        let pendingHtml = pendingTickets.map(tk => `<tr><td><strong style="color:white;">${tk.username}</strong><br><span style="font-size:11px;color:#aaa;">${tk.email}</span></td><td>${new Date(tk.createdAt).toLocaleString('vi-VN')}</td><td><span style="color:#ff4e00; font-weight:bold;">Chờ xử lý</span></td><td><button class="btn-admin-action" style="background:#00c6ff; color:white;" onclick="openAdminReplyModal('${tk._id}')"><i class="fas fa-reply"></i> Đọc & Trả Lời</button></td></tr>`).join('');
+        let pendingHtml = pendingTickets.map(tk => `<tr><td><strong style="color:white;">${tk.username}</strong><br><span style="font-size:11px;color:#aaa;">${tk.email}</span></td><td>${new Date(tk.createdAt || Date.now()).toLocaleString('vi-VN')}</td><td><span style="color:#ff4e00; font-weight:bold;">Chờ xử lý</span></td><td><button class="btn-admin-action" style="background:#00c6ff; color:white;" onclick="openAdminReplyModal('${tk._id}')"><i class="fas fa-reply"></i> Đọc & Trả Lời</button></td></tr>`).join('');
         document.getElementById('admin-ticket-pending-tbody').innerHTML = pendingHtml || '<tr><td colspan="4" style="padding: 30px; text-align: center; color: #888;">Không có phiếu chờ xử lý.</td></tr>';
 
-        let repliedHtml = repliedTickets.map(tk => `<tr><td><strong style="color:white;">${tk.username}</strong><br><span style="font-size:11px;color:#aaa;">${tk.email}</span></td><td>${new Date(tk.createdAt).toLocaleString('vi-VN')}</td><td><span style="color:#00e676;">Đã trả lời</span></td><td><button class="btn-admin-action" style="background:#444; color:white;" onclick="openAdminReplyModal('${tk._id}')"><i class="fas fa-eye"></i> Xem Lại</button></td></tr>`).join('');
+        let repliedHtml = repliedTickets.map(tk => `<tr><td><strong style="color:white;">${tk.username}</strong><br><span style="font-size:11px;color:#aaa;">${tk.email}</span></td><td>${new Date(tk.createdAt || Date.now()).toLocaleString('vi-VN')}</td><td><span style="color:#00e676;">Đã trả lời</span></td><td><button class="btn-admin-action" style="background:#444; color:white;" onclick="openAdminReplyModal('${tk._id}')"><i class="fas fa-eye"></i> Xem Lại</button></td></tr>`).join('');
         document.getElementById('admin-ticket-replied-tbody').innerHTML = repliedHtml || '<tr><td colspan="4" style="padding: 30px; text-align: center; color: #888;">Chưa có phiếu nào được xử lý.</td></tr>';
     } catch (e) {
         console.error("Lỗi tải phiếu hỗ trợ:", e);
@@ -1442,7 +1446,7 @@ window.filterAdminStats = function(period, btn) {
     document.getElementById('stat-total-users').innerText = filteredUsers.length.toLocaleString('vi-VN');
     const totalRevenue = filteredTxs.filter(t => t.status === 'success' && t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
     document.getElementById('stat-total-revenue').innerText = totalRevenue.toLocaleString('vi-VN') + 'đ';
-    const pendingTickets = filteredTickets.filter(t => t.status === 'pending').length;
+    const pendingTickets = filteredTickets.filter(t => t.status === 'pending' || !t.status).length;
     document.getElementById('stat-pending-tickets').innerText = pendingTickets;
 };
 
