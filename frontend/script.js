@@ -817,7 +817,13 @@ window.rollRandomUsername = function() {
 window.handleRegisterFinal = async function() {
     let un = document.getElementById('reg-username').value.trim();
     if (!un) { showNotification('warning', 'Chưa Nhập Tên', 'Bạn phải tạo Tên Tài Khoản!', 'Đã hiểu'); return; }
+    if (!tempRegData.phone || !tempRegData.email) { showNotification('error', 'Lỗi Dữ Liệu', 'Dữ liệu đăng ký bị mất do bạn vừa tải lại trang. Vui lòng F5 tải lại và làm lại từ Bước 1 nhé!', 'Đã hiểu'); return; }
     
+    // Chống lỗi bấm nút 2 lần liên tục (Double-click) sinh ra lỗi E11000 ảo
+    let regBtn = document.querySelector('#form-set-username .auth-btn');
+    if (regBtn.style.pointerEvents === 'none') return;
+    regBtn.style.pointerEvents = 'none';
+
     window.executeWithLoading(async () => {
         try {
             const response = await fetch('https://chunhatpham-online.onrender.com/api/auth/register', {
@@ -847,6 +853,7 @@ window.handleRegisterFinal = async function() {
                 document.getElementById('reg-refcode').value = ''; 
                 document.getElementById('reg-username').value = '';
                 document.getElementById('tab-btn-register').innerText = "ĐĂNG KÝ";
+                tempRegData = {}; // Xóa sạch dữ liệu bộ nhớ đệm
 
                 // Cập nhật giao diện sang trạng thái đã đăng nhập
                 checkAuthStatus();
@@ -864,6 +871,8 @@ window.handleRegisterFinal = async function() {
             console.error('Register error:', error);
             showNotification('error', 'Hệ Thống Đang Ngủ', 'Máy chủ đang khởi động lại. Vui lòng đợi khoảng 1 phút rồi bấm Đăng Ký lại nhé!', 'Đã hiểu');
         }
+        // Mở khóa lại nút bấm
+        regBtn.style.pointerEvents = 'auto';
     }, 800);
 };
 

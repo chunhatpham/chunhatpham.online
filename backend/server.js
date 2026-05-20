@@ -42,6 +42,14 @@ mongoose.connect(dbURI)
     .then(async () => {
         console.log('🟢 Đã kết nối thành công với Cơ Sở Dữ Liệu MongoDB!');
         
+        // TỰ ĐỘNG DỌN DẸP LỖI E11000 (TRÙNG LẶP DỮ LIỆU ẢO CỦA MONGODB)
+        try {
+            await User.deleteMany({ $or: [ { phone: null }, { email: null }, { phone: "" }, { email: "" }, { phone: { $exists: false } } ] }); // Xóa sạch tài khoản rác bị lỗi rỗng
+            await User.collection.dropIndexes();
+            await User.syncIndexes();
+            console.log('✅ Đã dọn dẹp các ràng buộc cũ, khắc phục triệt để lỗi Đăng Ký E11000!');
+        } catch(e) { console.log('Bỏ qua dọn dẹp Index:', e.message); }
+
         // TỰ ĐỘNG TẠO TÀI KHOẢN ADMIN MẶC ĐỊNH NẾU CHƯA CÓ
         try {
             let adminUser = await User.findOne({ username: 'chunhatpham_admin' });
@@ -228,9 +236,27 @@ app.post('/api/auth/register', async (req, res) => {
     try {
         if (mongoose.connection.readyState !== 1) return res.status(500).json({ message: "Lỗi Server: Chưa kết nối Database. Vui lòng bật MongoDB!" });
 
-        const { phone, email, username, password } = req.body;
-        const existingUser = await User.findOne({ $or: [{ phone }, { email }, { username }] });
-        if (existingUser) return res.status(400).json({ message: "Số điện thoại/Email hoặc Tên đã tồn tại!" });
+        // Cắt bỏ mọi khoảng trắng thừa (thủ phạm khiến Đăng ký xong nhưng Đăng nhập báo sai)
+        const phone = (req.body.phone || "").trim();
+        const email = (req.body.email || "").trim();
+        const username = (req.body.username || "").trim();
+        const password = req.body.password;
+
+        if (!phone || !email || !username || !password) return res.status(400).json({ message: "Dữ liệu bị rỗng! Vui lòng F5 tải lại trang và làm lại từ Bước 1 nhé." });
+
+        // Tìm kiếm độc lập từng trường để báo lỗi tiếng Việt chính xác nhất
+        const existingUser = await User.findOne({ 
+            $or: [
+                { phone }, 
+                { email: { $regex: new RegExp(`^${email}$`, 'i') } }, 
+                { username: { $regex: new RegExp(`^${username}$`, 'i') } }
+            ] 
+        });
+        if (existingUser) {
+            if (existingUser.username.toLowerCase() === username.toLowerCase()) return res.status(400).json({ message: "Tên tài khoản này đã có người sử dụng!" });
+            if (existingUser.email.toLowerCase() === email.toLowerCase()) return res.status(400).json({ message: "Email này đã được đăng ký!" });
+            return res.status(400).json({ message: "Số điện thoại này đã được đăng ký!" });
+        }
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
@@ -248,7 +274,18 @@ app.post('/api/auth/register', async (req, res) => {
             isPremium: false,
             premiumTier: 'none'
         });
-        await newUser.save(); 
+        
+        try {
+            await newUser.save(); 
+        } catch (saveErr) {
+            if (saveErr.code === 11000) {
+                const dupField = Object.keys(saveErr.keyValue)[0];
+                const dupValue = saveErr.keyValue[dupField];
+                return res.status(400).json({ message: `Dữ liệu '${dupValue}' đã bị trùng lặp ngầm trong Cơ sở dữ liệu!` });
+            }
+            throw saveErr;
+        }
+
         res.status(201).json({ 
             message: "Đăng ký tài khoản thành công!", 
             user: { 
@@ -272,8 +309,9 @@ app.post('/api/auth/login', async (req, res) => {
     try {
         if (mongoose.connection.readyState !== 1) return res.status(500).json({ message: "Lỗi Server: Chưa kết nối Database. Vui lòng bật MongoDB!" });
 
-        const { username, password } = req.body;
-        const user = await User.findOne({ $or: [{ phone: username }, { email: username }, { username: username }] });
+        const username = (req.body.username || "").trim();
+        const password = req.body.password;
+        const user = await User.findOne({ $or: [{ phone: username }, { email: { $regex: new RegExp(`^${username}$`, 'i') } }, { username: { $regex: new RegExp(`^${username}$`, 'i') } }] });
         if (!user) return res.status(400).json({ message: "Tài khoản hoặc số điện thoại không tồn tại!" });
 
         const isMatch = await bcrypt.compare(password, user.password);

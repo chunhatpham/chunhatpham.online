@@ -223,7 +223,7 @@
     <div class="search-container-wrapper">
         <div class="long-search-bar">
             <i class="fas fa-search"></i>
-            <input type="text" id="main-search-input" placeholder="Nhập tên phim bạn muốn tìm..." onkeypress="handleSearchKeyPress(event)">
+            <input type="text" id="main-search-input" placeholder="Nhập tên phim bạn muốn tìm..." onkeypress="handleSearchKeyPress(event)" autocomplete="off">
             <button class="btn-search-action" onclick="executeSearch()">Tìm Kiếm</button>
         </div>
     </div>
@@ -566,8 +566,8 @@
                     </div>
 
                     <div id="form-login">
-                        <input type="text" id="login-username" class="auth-input" placeholder="Tên tài khoản *" required>
-                        <input type="password" id="login-password" class="auth-input" placeholder="Mật khẩu *" required>
+                        <input type="text" id="login-username" class="auth-input" placeholder="Tên tài khoản *" required autocomplete="off">
+                        <input type="password" id="login-password" class="auth-input" placeholder="Mật khẩu *" required autocomplete="new-password">
                         <div class="forgot-pw-link" id="forgot-pw-trigger" onclick="openForgotModal()"><i class="fas fa-key"></i> Quên mật khẩu?</div>
                         <button class="auth-btn" onclick="handleLogin()"><i class="fas fa-sign-in-alt"></i> Đăng Nhập Ngay</button>
                     </div>
@@ -577,7 +577,7 @@
                         <input type="email" id="reg-email" class="auth-input" placeholder="Địa chỉ Email (Bắt buộc) *" required>
                         <input type="password" id="reg-password" class="auth-input" placeholder="Mật khẩu *" required>
                         <input type="password" id="reg-confirm-password" class="auth-input" placeholder="Xác nhận mật khẩu *" required>
-                        <input type="text" id="reg-refcode" class="auth-input" placeholder="Mã giới thiệu (Không bắt buộc)">
+                        <input type="text" id="reg-refcode" class="auth-input" placeholder="Mã giới thiệu (Không bắt buộc)" autocomplete="off">
                         
                         <button class="auth-btn" onclick="handleRegisterStep1()"><i class="fas fa-arrow-right"></i> Tiếp Tục</button>
                     </div>
