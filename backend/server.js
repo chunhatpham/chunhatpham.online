@@ -712,7 +712,8 @@ app.get('/api/admin/users', async (req, res) => {
 
 app.get('/api/admin/transactions', async (req, res) => {
     try {
-        const txs = await Transaction.find().sort({ createdAt: -1 });
+        // Bỏ sắp xếp ở đây để tránh lỗi do dữ liệu cũ/hỏng. Sẽ sắp xếp ở Frontend.
+        const tickets = await Ticket.find();
         res.status(200).json(txs);
     } catch (error) { res.status(500).json({ message: "Lỗi lấy danh sách giao dịch" }); }
 });

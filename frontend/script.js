@@ -1264,21 +1264,14 @@ window.submitSupportTicket = async function() {
                 showNotification('success', 'Gửi Thành Công', 'Phiếu hỗ trợ đã được gửi. Chúng tôi sẽ phản hồi sớm nhất!', 'Đóng'); 
                 document.getElementById('support-name').value = ''; document.getElementById('support-email').value = ''; document.getElementById('support-content').value = ''; imgInput.value = ''; window.updateFileName(imgInput); 
             } else {
-                // Cải thiện báo lỗi: Cố gắng lấy thông báo lỗi chi tiết từ server
-                let errorMessage = `Lỗi máy chủ (Mã: ${res.status}).`;
                 try {
-                    const errorData = await res.json();
-                    errorMessage = errorData.message || JSON.stringify(errorData);
-                } catch (jsonError) {
-                    // Nếu server sập và trả về HTML, sẽ không parse được JSON
-                    errorMessage = "Máy chủ không phản hồi đúng định dạng. Vui lòng thử lại sau ít phút.";
+                    let errData = await res.json();
+                    showNotification('error', 'Gửi Thất Bại', errData.message || 'Lỗi không xác định từ máy chủ.', 'Đóng');
+                } catch (e) {
+                    showNotification('error', 'Gửi Thất Bại', 'Máy chủ trả về lỗi không mong muốn. Vui lòng thử lại sau.', 'Đóng');
                 }
-                showNotification('error', 'Gửi Thất Bại', errorMessage, 'Đóng');
             }
-        } catch (e) { 
-            console.error("Lỗi mạng khi gửi phiếu:", e);
-            showNotification('error', 'Lỗi Mạng', 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại đường truyền.', 'Đóng'); 
-        }
+        } catch (e) { showNotification('error', 'Lỗi Mạng', 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại đường truyền.', 'Đóng'); }
     });
 };
 
