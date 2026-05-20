@@ -1348,15 +1348,16 @@ window.switchAdminTab = function(tabId) {
     document.getElementById('admin-tab-' + tabId).classList.add('active');
 };
 
+window.adminFullData = { users: [], transactions: [], tickets: [] };
+
 window.loadAdminData = async function() {
     // Tải và render User trước tiên, vì đây là tab mặc định và quan trọng nhất
     try {
         const usersRes = await fetch('https://chunhatpham-online.onrender.com/api/admin/users');
         if (!usersRes.ok) throw new Error(`Server responded with ${usersRes.status}`);
-        const users = await usersRes.json();
-        document.getElementById('stat-total-users').innerText = users.length.toLocaleString('vi-VN');
-        window.adminLoadedUsers = users;
-        window.renderAdminUsers(users);
+        window.adminFullData.users = await usersRes.json();
+        window.adminLoadedUsers = window.adminFullData.users; // Tương thích với code cũ
+        window.renderAdminUsers(window.adminFullData.users);
     } catch (e) {
         console.error("Lỗi tải danh sách người dùng:", e);
         document.getElementById('admin-user-tbody').innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 30px; color: #ff4e00;">Lỗi tải danh sách người dùng. Vui lòng kiểm tra lại Server hoặc đường truyền.</td></tr>';
@@ -1367,13 +1368,10 @@ window.loadAdminData = async function() {
     try {
         const txsRes = await fetch('https://chunhatpham-online.onrender.com/api/admin/transactions');
         if (!txsRes.ok) throw new Error(`Server responded with ${txsRes.status}`);
-        const txs = await txsRes.json();
+        window.adminFullData.transactions = await txsRes.json();
         
-        let totalRevenue = txs.filter(t => t.status === 'success' && t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
-        document.getElementById('stat-total-revenue').innerText = totalRevenue.toLocaleString('vi-VN') + 'đ';
-        
-        const deposits = txs.filter(t => t.amount > 0);
-        const spends = txs.filter(t => t.amount < 0);
+        const deposits = window.adminFullData.transactions.filter(t => t.amount > 0);
+        const spends = window.adminFullData.transactions.filter(t => t.amount < 0);
 
         let depHtml = deposits.map(t => {
             let d = new Date(t.createdAt).toLocaleString('vi-VN');
@@ -1397,14 +1395,11 @@ window.loadAdminData = async function() {
     try {
         const tksRes = await fetch('https://chunhatpham-online.onrender.com/api/admin/tickets');
         if (!tksRes.ok) throw new Error(`Server responded with ${tksRes.status}`);
-        const tks = await tksRes.json();
-
-        let pendingCount = tks.filter(t => t.status === 'pending').length;
-        document.getElementById('stat-pending-tickets').innerText = pendingCount;
+        window.adminFullData.tickets = await tksRes.json();
         
-        window.adminLoadedTickets = tks;
-        const pendingTickets = tks.filter(t => t.status === 'pending');
-        const repliedTickets = tks.filter(t => t.status !== 'pending');
+        window.adminLoadedTickets = window.adminFullData.tickets; // Tương thích code cũ
+        const pendingTickets = window.adminFullData.tickets.filter(t => t.status === 'pending');
+        const repliedTickets = window.adminFullData.tickets.filter(t => t.status !== 'pending');
         
         document.getElementById('pending-tickets-badge').innerText = pendingTickets.length;
 
@@ -1418,6 +1413,37 @@ window.loadAdminData = async function() {
         document.getElementById('admin-ticket-pending-tbody').innerHTML = '<tr><td colspan="4" style="padding: 30px; text-align: center; color: #ff4e00;">Lỗi tải phiếu hỗ trợ.</td></tr>';
         document.getElementById('admin-ticket-replied-tbody').innerHTML = '<tr><td colspan="4" style="padding: 30px; text-align: center; color: #ff4e00;">Lỗi tải phiếu hỗ trợ.</td></tr>';
     }
+
+    // Sau khi tải xong tất cả, tính toán thống kê mặc định (Hôm nay)
+    filterAdminStats('today', document.querySelector('.time-filter-btn'));
+};
+
+window.filterAdminStats = function(period, btn) {
+    document.querySelectorAll('.time-filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    let startDate;
+
+    if (period === 'today') startDate = today;
+    else if (period === 'yesterday') startDate = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+    else if (period === '7days') startDate = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000);
+    else if (period === '30days') startDate = new Date(today.getTime() - 29 * 24 * 60 * 60 * 1000);
+    else if (period === '60days') startDate = new Date(today.getTime() - 59 * 24 * 60 * 60 * 1000);
+    else if (period === '1year') startDate = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
+
+    const endDate = (period === 'yesterday') ? today : new Date(now.getTime() + 1000); // +1s để bao gồm cả ngày hôm nay
+
+    const filteredUsers = window.adminFullData.users.filter(u => new Date(u.createdAt) >= startDate && new Date(u.createdAt) < endDate);
+    const filteredTxs = window.adminFullData.transactions.filter(t => new Date(t.createdAt) >= startDate && new Date(t.createdAt) < endDate);
+    const filteredTickets = window.adminFullData.tickets.filter(t => new Date(t.createdAt) >= startDate && new Date(t.createdAt) < endDate);
+
+    document.getElementById('stat-total-users').innerText = filteredUsers.length.toLocaleString('vi-VN');
+    const totalRevenue = filteredTxs.filter(t => t.status === 'success' && t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
+    document.getElementById('stat-total-revenue').innerText = totalRevenue.toLocaleString('vi-VN') + 'đ';
+    const pendingTickets = filteredTickets.filter(t => t.status === 'pending').length;
+    document.getElementById('stat-pending-tickets').innerText = pendingTickets;
 };
 
 // Hàm Render và Lọc Danh Sách Người Dùng

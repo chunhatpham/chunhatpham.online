@@ -692,6 +692,12 @@ header { position: fixed; top: 0; width: 100%; display: flex; justify-content: s
 .stat-info h3 { color: white; font-size: 24px; font-weight: 900; letter-spacing: 1px; }
 @media(max-width: 768px) { .admin-stats-row { grid-template-columns: 1fr; } }
 
+.admin-time-filter { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.time-filter-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #aaa; padding: 8px 15px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+.time-filter-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+.time-filter-btn.active { background: #00c6ff; color: white; border-color: #00c6ff; box-shadow: 0 4px 15px rgba(0, 198, 255, 0.3); }
+
+
 .admin-tabs { display: flex; gap: 15px; margin-bottom: 25px; border-bottom: 2px solid rgba(255,255,255,0.05); padding-bottom: 15px; overflow-x: auto; scrollbar-width: none; }
 .admin-tab-btn { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #aaa; padding: 12px 25px; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
 .admin-tab-btn:hover { color: white; background: rgba(255,255,255,0.1); }

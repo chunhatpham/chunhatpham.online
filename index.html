@@ -696,6 +696,16 @@
             <div class="page-padding">
                 <h2 class="section-title" style="color: #00e676; border-left-color: #00e676;"><i class="fas fa-cogs"></i> Bảng Điều Khiển Admin</h2>
                 
+                <!-- BỘ LỌC THỐNG KÊ THEO THỜI GIAN -->
+                <div class="admin-time-filter">
+                    <button class="time-filter-btn active" onclick="filterAdminStats('today', this)">Hôm Nay</button>
+                    <button class="time-filter-btn" onclick="filterAdminStats('yesterday', this)">Hôm Qua</button>
+                    <button class="time-filter-btn" onclick="filterAdminStats('7days', this)">7 Ngày Qua</button>
+                    <button class="time-filter-btn" onclick="filterAdminStats('30days', this)">30 Ngày Qua</button>
+                    <button class="time-filter-btn" onclick="filterAdminStats('60days', this)">60 Ngày Qua</button>
+                    <button class="time-filter-btn" onclick="filterAdminStats('1year', this)">1 Năm</button>
+                </div>
+
                 <!-- THỐNG KÊ TỔNG QUAN -->
                 <div class="admin-stats-row">
                     <div class="admin-stat-card">
