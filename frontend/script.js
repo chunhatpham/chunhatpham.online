@@ -1375,7 +1375,9 @@ window.loadAdminData = async function() {
     try {
         const txsRes = await fetch('https://chunhatpham-online.onrender.com/api/admin/transactions');
         if (!txsRes.ok) throw new Error(`Server responded with ${txsRes.status}`);
-        window.adminFullData.transactions = await txsRes.json();
+        let rawTxs = await txsRes.json();
+        rawTxs.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+        window.adminFullData.transactions = rawTxs;
         
         const deposits = window.adminFullData.transactions.filter(t => t.amount > 0);
         const spends = window.adminFullData.transactions.filter(t => t.amount < 0);
