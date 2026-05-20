@@ -1361,21 +1361,24 @@ window.loadAdminData = async function() {
     // Tải và render User trước tiên, vì đây là tab mặc định và quan trọng nhất
     try {
         const usersRes = await fetch('https://chunhatpham-online.onrender.com/api/admin/users');
-        if (!usersRes.ok) throw new Error(`Server responded with ${usersRes.status}`);
-        window.adminFullData.users = await usersRes.json();
+        if (!usersRes.ok) { let errText = await usersRes.text(); throw new Error(`Mã lỗi ${usersRes.status} - ${errText}`); }
+        let rawUsers = await usersRes.json();
+        if (!Array.isArray(rawUsers)) rawUsers = [];
+        window.adminFullData.users = rawUsers;
         window.adminLoadedUsers = window.adminFullData.users; // Tương thích với code cũ
         window.renderAdminUsers(window.adminFullData.users);
     } catch (e) {
         console.error("Lỗi tải danh sách người dùng:", e);
-        document.getElementById('admin-user-tbody').innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 30px; color: #ff4e00;">Lỗi tải danh sách người dùng. Vui lòng kiểm tra lại Server hoặc đường truyền.</td></tr>';
+        document.getElementById('admin-user-tbody').innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 30px; color: #ff4e00;"><strong>LỖI TẢI DỮ LIỆU:</strong> ${e.message}<br><br><span style="color:#aaa; font-size:14px;">(Nguyên nhân: Máy chủ Render chưa cập nhật code. Vui lòng vào Render.com -> Manual Deploy -> Clear build cache & deploy)</span></td></tr>`;
     }
 
     // Tải các dữ liệu còn lại một cách độc lập để không làm ảnh hưởng đến nhau
     // Tải Giao dịch
     try {
         const txsRes = await fetch('https://chunhatpham-online.onrender.com/api/admin/transactions');
-        if (!txsRes.ok) throw new Error(`Server responded with ${txsRes.status}`);
+        if (!txsRes.ok) { let errText = await txsRes.text(); throw new Error(`Mã lỗi ${txsRes.status} - ${errText}`); }
         let rawTxs = await txsRes.json();
+        if (!Array.isArray(rawTxs)) rawTxs = [];
         rawTxs.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
         window.adminFullData.transactions = rawTxs;
         
@@ -1396,15 +1399,16 @@ window.loadAdminData = async function() {
         document.getElementById('admin-tx-spend-tbody').innerHTML = spendHtml || '<tr><td colspan="4" style="text-align:center; padding: 30px; color:#888;">Chưa có giao dịch tiêu tiền.</td></tr>';
     } catch (e) {
         console.error("Lỗi tải giao dịch:", e);
-        document.getElementById('admin-tx-deposit-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 30px; color: #ff4e00;">Lỗi tải lịch sử giao dịch.</td></tr>';
-        document.getElementById('admin-tx-spend-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 30px; color: #ff4e00;">Lỗi tải lịch sử giao dịch.</td></tr>';
+        document.getElementById('admin-tx-deposit-tbody').innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 30px; color: #ff4e00;"><strong>LỖI TẢI DỮ LIỆU:</strong> ${e.message}<br><br><span style="color:#aaa; font-size:14px;">(Nguyên nhân: Máy chủ Render chưa cập nhật code. Vui lòng vào Render.com -> Manual Deploy -> Clear build cache & deploy)</span></td></tr>`;
+        document.getElementById('admin-tx-spend-tbody').innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 30px; color: #ff4e00;"><strong>LỖI TẢI DỮ LIỆU:</strong> ${e.message}</td></tr>`;
     }
 
     // Tải Phiếu hỗ trợ
     try {
         const tksRes = await fetch('https://chunhatpham-online.onrender.com/api/admin/tickets');
-        if (!tksRes.ok) throw new Error(`Server responded with ${tksRes.status}`);
+        if (!tksRes.ok) { let errText = await tksRes.text(); throw new Error(`Mã lỗi ${tksRes.status} - ${errText}`); }
         let rawTickets = await tksRes.json();
+        if (!Array.isArray(rawTickets)) rawTickets = [];
         // Sắp xếp ở đây để đảm bảo an toàn, ngay cả khi có dữ liệu cũ bị lỗi ngày tháng
         rawTickets.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
         window.adminFullData.tickets = rawTickets;
@@ -1423,8 +1427,8 @@ window.loadAdminData = async function() {
         document.getElementById('admin-ticket-replied-tbody').innerHTML = repliedHtml || '<tr><td colspan="4" style="padding: 30px; text-align: center; color: #888;">Chưa có phiếu nào được xử lý.</td></tr>';
     } catch (e) {
         console.error("Lỗi tải phiếu hỗ trợ:", e);
-        document.getElementById('admin-ticket-pending-tbody').innerHTML = '<tr><td colspan="4" style="padding: 30px; text-align: center; color: #ff4e00;">Lỗi tải phiếu hỗ trợ.</td></tr>';
-        document.getElementById('admin-ticket-replied-tbody').innerHTML = '<tr><td colspan="4" style="padding: 30px; text-align: center; color: #ff4e00;">Lỗi tải phiếu hỗ trợ.</td></tr>';
+        document.getElementById('admin-ticket-pending-tbody').innerHTML = `<tr><td colspan="4" style="padding: 30px; text-align: center; color: #ff4e00; font-size: 15px;"><strong>LỖI TẢI DỮ LIỆU:</strong><br>${e.message}<br><br><span style="color:#aaa; font-size: 13px;">(Máy chủ Render chưa nhận được Code mới. Vui lòng vào Render.com -> Manual Deploy -> Clear build cache & deploy)</span></td></tr>`;
+        document.getElementById('admin-ticket-replied-tbody').innerHTML = `<tr><td colspan="4" style="padding: 30px; text-align: center; color: #ff4e00;">Lỗi tải dữ liệu: ${e.message}</td></tr>`;
     }
 
     // Sau khi tải xong tất cả, tính toán thống kê mặc định (Hôm nay)
