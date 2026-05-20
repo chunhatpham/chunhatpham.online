@@ -18,7 +18,7 @@ window.realMoviesDatabase = []; // Sẽ được nạp từ Server DB
 window.fetchMoviesFromDatabase = async function() {
     try {
         // Thêm timestamp để PHÁ BỘ NHỚ ĐỆM của trình duyệt, ép tải dữ liệu thật
-        let res = await fetch('http://localhost:5000/api/movies?nocache=' + new Date().getTime());
+        let res = await fetch('https://chunhatpham-online.onrender.com/api/movies?nocache=' + new Date().getTime());
         window.realMoviesDatabase = await res.json();
         
         // Render lại toàn bộ giao diện sau khi có dữ liệu
@@ -385,7 +385,7 @@ window.likeCurrentMovie = function() {
     likedMovies.push(window.currentMovieSlug);
     localStorage.setItem('cnp_liked_movies', JSON.stringify(likedMovies));
     
-    fetch(`http://localhost:5000/api/movies/${window.currentMovieSlug}/like`, { method: 'POST' }).catch(e=>{});
+    fetch(`https://chunhatpham-online.onrender.com/api/movies/${window.currentMovieSlug}/like`, { method: 'POST' }).catch(e=>{});
     showNotification('success', 'Cảm ơn bạn', 'Đã thích bộ phim thành công!', 'Tuyệt');
 };
 
@@ -599,7 +599,7 @@ window.confirmBuyNoAds = function() {
 
     window.executeWithLoading(async () => {
         try {
-            let res = await fetch('http://localhost:5000/api/user/buy-no-ads', {
+            let res = await fetch('https://chunhatpham-online.onrender.com/api/user/buy-no-ads', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: currentUser.username })
             });
@@ -644,7 +644,7 @@ window.syncUserToServer = async function() {
     let currentUser = JSON.parse(localStorage.getItem('cnp_current_user'));
     if (!currentUser) return;
     try {
-        await fetch('http://localhost:5000/api/user/update', {
+        await fetch('https://chunhatpham-online.onrender.com/api/user/update', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -738,7 +738,7 @@ window.handleLogin = async function() {
 
     window.executeWithLoading(async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/auth/login', {
+            const response = await fetch('https://chunhatpham-online.onrender.com/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
@@ -804,7 +804,7 @@ window.handleRegisterFinal = async function() {
     
     window.executeWithLoading(async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/auth/register', {
+            const response = await fetch('https://chunhatpham-online.onrender.com/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -949,7 +949,7 @@ window.confirmDeposit = function() {
                 return;
             }
 
-            const response = await fetch(`http://localhost:5000/api/user/${currentUser.username}`);
+            const response = await fetch(`https://chunhatpham-online.onrender.com/api/user/${currentUser.username}`);
             const data = await response.json();
 
             if (response.ok && data && data.walletBalance > currentBalance) {
@@ -1051,7 +1051,7 @@ window.confirmPurchasePremium = function() {
     
     window.executeWithLoading(async () => {
         try {
-            let res = await fetch('http://localhost:5000/api/user/buy-premium', {
+            let res = await fetch('https://chunhatpham-online.onrender.com/api/user/buy-premium', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: currentUser.username, months: currentPremMonths, price: currentPremPrice, tier: currentPremTier })
@@ -1225,7 +1225,7 @@ window.submitSupportTicket = async function() {
 
     window.executeWithLoading(async () => {
         try {
-            let res = await fetch('http://localhost:5000/api/support', {
+            let res = await fetch('https://chunhatpham-online.onrender.com/api/support', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: currentUser.username, name, email, content, image: base64Image })
             });
@@ -1296,7 +1296,7 @@ window.handleChangePassword = async function() {
 
     window.executeWithLoading(async () => {
         try {
-            let res = await fetch('http://localhost:5000/api/user/change-password', {
+            let res = await fetch('https://chunhatpham-online.onrender.com/api/user/change-password', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: currentUser.username, currentPassword: currPass, newPassword: newPass })
             });
@@ -1320,7 +1320,7 @@ window.switchAdminTab = function(tabId) {
 window.loadAdminData = async function() {
     try {
         const [usersRes, txsRes, tksRes] = await Promise.all([
-            fetch('http://localhost:5000/api/admin/users'), fetch('http://localhost:5000/api/admin/transactions'), fetch('http://localhost:5000/api/admin/tickets')
+            fetch('https://chunhatpham-online.onrender.com/api/admin/users'), fetch('https://chunhatpham-online.onrender.com/api/admin/transactions'), fetch('https://chunhatpham-online.onrender.com/api/admin/tickets')
         ]);
         const users = await usersRes.json(); const txs = await txsRes.json(); const tks = await tksRes.json();
         
@@ -1419,7 +1419,7 @@ window.submitManualBalance = async function() {
     if(!amt || amt <= 0) { showNotification('warning', 'Lỗi', 'Nhập số tiền lớn hơn 0', 'OK'); return; }
     window.executeWithLoading(async () => {
         try {
-            let res = await fetch('http://localhost:5000/api/admin/add-balance', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUsername: un, amount: amt }) });
+            let res = await fetch('https://chunhatpham-online.onrender.com/api/admin/add-balance', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUsername: un, amount: amt }) });
             let data = await res.json();
             if(res.ok) { showNotification('success', 'Thành Công', data.message, 'Đóng'); document.getElementById('admin-add-balance-modal').classList.remove('show'); loadAdminData(); }
             else { showNotification('error', 'Lỗi', data.message, 'Đóng'); }
@@ -1447,7 +1447,7 @@ window.submitEditUser = async function() {
 
     window.executeWithLoading(async () => {
         try {
-            let res = await fetch(`http://localhost:5000/api/admin/user/${un}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            let res = await fetch(`https://chunhatpham-online.onrender.com/api/admin/user/${un}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
             let data = await res.json();
             if(res.ok) { showNotification('success', 'Thành Công', data.message, 'Đóng'); document.getElementById('admin-edit-user-modal').classList.remove('show'); loadAdminData(); }
             else { showNotification('error', 'Lỗi', data.message, 'Đóng'); }
@@ -1459,7 +1459,7 @@ window.deleteUser = async function(username) {
     if(username === 'chunhatpham_admin') { showNotification('error', 'Từ Chối', 'Không thể xóa tài khoản Admin tối cao!', 'Đã hiểu'); return; }
     if(!confirm(`BẠN CÓ CHẮC CHẮN MUỐN XÓA VĨNH VIỄN TÀI KHOẢN "${username}" KHÔNG? Hành động này không thể hoàn tác!`)) return;
     try {
-        let res = await fetch(`http://localhost:5000/api/admin/user/${username}`, { method: 'DELETE' });
+        let res = await fetch(`https://chunhatpham-online.onrender.com/api/admin/user/${username}`, { method: 'DELETE' });
         let data = await res.json();
         if(res.ok) { showNotification('success', 'Đã Xóa', data.message, 'OK'); loadAdminData(); }
     } catch(e) { showNotification('error', 'Lỗi', 'Lỗi kết nối máy chủ', 'Đóng'); }
@@ -1490,7 +1490,7 @@ window.loadNotifications = async function() {
     let currentUser = JSON.parse(localStorage.getItem('cnp_current_user'));
     if(!currentUser) return;
     try {
-        let res = await fetch(`http://localhost:5000/api/user/notifications/${currentUser.username}`);
+        let res = await fetch(`https://chunhatpham-online.onrender.com/api/user/notifications/${currentUser.username}`);
         let notifs = await res.json();
         
         let badge = document.getElementById('notif-badge');
@@ -1519,7 +1519,7 @@ window.markNotifRead = async function(id, el) {
     let badge = document.getElementById('notif-badge');
     let currentNum = parseInt(badge.innerText);
     if(currentNum > 1) { badge.innerText = currentNum - 1; } else { badge.style.display = 'none'; }
-    fetch(`http://localhost:5000/api/user/notifications/read/${id}`, { method: 'POST' }).catch(e=>{});
+    fetch(`https://chunhatpham-online.onrender.com/api/user/notifications/read/${id}`, { method: 'POST' }).catch(e=>{});
 };
 
 window.openAdminReplyModal = function(ticketId) {
@@ -1539,7 +1539,7 @@ window.submitAdminReply = async function() {
     if(!replyText) { showNotification('warning', 'Lỗi', 'Vui lòng nhập nội dung trả lời!', 'Đã hiểu'); return; }
     window.executeWithLoading(async () => {
         try {
-            let res = await fetch('http://localhost:5000/api/admin/ticket/reply', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ ticketId: tid, replyContent: replyText }) });
+            let res = await fetch('https://chunhatpham-online.onrender.com/api/admin/ticket/reply', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ ticketId: tid, replyContent: replyText }) });
             if(res.ok) { showNotification('success', 'Thành Công', 'Đã phản hồi tới khách hàng!', 'Đóng'); document.getElementById('admin-reply-modal').classList.remove('show'); loadAdminData(); }
         } catch(e) { showNotification('error', 'Lỗi', 'Lỗi máy chủ', 'Đóng'); }
     });
@@ -1563,7 +1563,7 @@ window.requestResetOtp = async function() {
     
     window.executeWithLoading(async () => {
         try {
-            let res = await fetch('http://localhost:5000/api/auth/forgot-password', {
+            let res = await fetch('https://chunhatpham-online.onrender.com/api/auth/forgot-password', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ identifier })
             });
@@ -1593,7 +1593,7 @@ window.submitNewPassword = async function() {
 
     window.executeWithLoading(async () => {
         try {
-            let res = await fetch('http://localhost:5000/api/auth/reset-password', {
+            let res = await fetch('https://chunhatpham-online.onrender.com/api/auth/reset-password', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, otp, newPassword: newPass })
             });
@@ -1672,7 +1672,7 @@ window.cancelReply = function() { window.selectedReplyMsg = null; document.getEl
 
 window.loadChatMessages = async function() {
     try {
-        let res = await fetch('http://localhost:5000/api/chat');
+        let res = await fetch('https://chunhatpham-online.onrender.com/api/chat');
         let messages = await res.json();
         
         let chatArea = document.getElementById('chat-messages-area');
@@ -1778,7 +1778,7 @@ window.sendChatMessage = async function() {
         if(window.selectedReplyMsg) payload.replyTo = window.selectedReplyMsg;
         if(window.selectedImageBase64) payload.image = window.selectedImageBase64;
 
-        let res = await fetch('http://localhost:5000/api/chat', {
+        let res = await fetch('https://chunhatpham-online.onrender.com/api/chat', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
@@ -1831,7 +1831,7 @@ window.sendReaction = async function(msgId, emoji) {
     if(!currentUser) { showNotification('warning', 'Yêu cầu', 'Đăng nhập để thả cảm xúc', 'OK'); return; }
     document.getElementById('chat-context-menu').classList.remove('show'); document.getElementById('chat-context-menu').style.display = 'none';
     try {
-        await fetch(`http://localhost:5000/api/chat/${msgId}/react`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: currentUser.username, emoji: emoji }) });
+        await fetch(`https://chunhatpham-online.onrender.com/api/chat/${msgId}/react`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: currentUser.username, emoji: emoji }) });
         window.loadChatMessages(); 
     } catch(e) {}
 };
@@ -1840,7 +1840,7 @@ window.deleteSelectedMessage = async function() {
     let currentUser = JSON.parse(localStorage.getItem('cnp_current_user')); document.getElementById('chat-context-menu').classList.remove('show'); document.getElementById('chat-context-menu').style.display = 'none';
     if(confirm("Bạn có chắc chắn muốn thu hồi tin nhắn này?")) {
         try {
-            await fetch(`http://localhost:5000/api/chat/${window.contextMsgId}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: currentUser.username }) });
+            await fetch(`https://chunhatpham-online.onrender.com/api/chat/${window.contextMsgId}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: currentUser.username }) });
             window.loadChatMessages();
         } catch(e) {}
     }
@@ -1849,7 +1849,7 @@ window.deleteSelectedMessage = async function() {
 window.togglePinMessage = async function() {
     let currentUser = JSON.parse(localStorage.getItem('cnp_current_user')); document.getElementById('chat-context-menu').classList.remove('show'); document.getElementById('chat-context-menu').style.display = 'none';
     try {
-        await fetch(`http://localhost:5000/api/chat/${window.contextMsgId}/pin`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: currentUser.username }) });
+        await fetch(`https://chunhatpham-online.onrender.com/api/chat/${window.contextMsgId}/pin`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: currentUser.username }) });
         window.loadChatMessages();
     } catch(e) {}
 };
@@ -1857,7 +1857,7 @@ window.unpinCurrentMessage = async function() {
     let currentUser = JSON.parse(localStorage.getItem('cnp_current_user'));
     if(!window.currentPinnedMsgId) return;
     try {
-        await fetch(`http://localhost:5000/api/chat/${window.currentPinnedMsgId}/pin`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: currentUser.username }) });
+        await fetch(`https://chunhatpham-online.onrender.com/api/chat/${window.currentPinnedMsgId}/pin`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: currentUser.username }) });
         window.loadChatMessages();
     } catch(e) {}
 };
