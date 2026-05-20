@@ -769,10 +769,17 @@ app.put('/api/admin/user/:username', async (req, res) => {
 
 app.get('/api/admin/tickets', async (req, res) => {
     try {
-        // Bỏ sắp xếp ở đây để tránh lỗi do dữ liệu cũ/hỏng. Sẽ sắp xếp ở Frontend.
-        const tickets = await Ticket.find();
+        // Loại bỏ trường ảnh Base64 khổng lồ bằng select('-image') để chống sập Server và tải cực nhanh
+        const tickets = await Ticket.find().select('-image');
         res.status(200).json(tickets);
     } catch (error) { res.status(500).json({ message: "Lỗi lấy danh sách hỗ trợ" }); }
+});
+
+app.get('/api/admin/ticket/:id', async (req, res) => {
+    try {
+        const ticket = await Ticket.findById(req.params.id);
+        res.status(200).json(ticket);
+    } catch (error) { res.status(500).json({ message: "Lỗi tải chi tiết phiếu" }); }
 });
 
 app.post('/api/admin/ticket/reply', async (req, res) => {

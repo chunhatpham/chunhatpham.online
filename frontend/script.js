@@ -1618,14 +1618,24 @@ window.markNotifRead = async function(id, el) {
 };
 
 window.openAdminReplyModal = function(ticketId) {
-    let tk = window.adminLoadedTickets.find(t => t._id === ticketId);
-    if(!tk) return;
-    document.getElementById('admin-reply-ticket-id').value = ticketId;
-    document.getElementById('admin-ticket-content-view').innerHTML = `<strong>Nội dung:</strong><br/>${tk.content}`;
-    let imgView = document.getElementById('admin-ticket-image-view');
-    if(tk.image) { imgView.style.display = 'block'; imgView.querySelector('img').src = tk.image; } else { imgView.style.display = 'none'; }
-    document.getElementById('admin-reply-text').value = tk.replyContent || '';
-    document.getElementById('admin-reply-modal').classList.add('show');
+    window.executeWithLoading(async () => {
+        try {
+            let res = await fetch(`https://chunhatpham-online.onrender.com/api/admin/ticket/${ticketId}`);
+            if(res.ok) {
+                let tk = await res.json();
+                document.getElementById('admin-reply-ticket-id').value = ticketId;
+                document.getElementById('admin-ticket-content-view').innerHTML = `<strong>Nội dung:</strong><br/>${tk.content}`;
+                let imgView = document.getElementById('admin-ticket-image-view');
+                if(tk.image) { imgView.style.display = 'block'; imgView.querySelector('img').src = tk.image; } else { imgView.style.display = 'none'; }
+                document.getElementById('admin-reply-text').value = tk.replyContent || '';
+                document.getElementById('admin-reply-modal').classList.add('show');
+            } else {
+                showNotification('error', 'Lỗi', 'Không thể tải chi tiết phiếu này', 'Đóng');
+            }
+        } catch(e) {
+            showNotification('error', 'Lỗi Mạng', 'Không kết nối được với máy chủ', 'Đóng');
+        }
+    }, 100);
 };
 
 window.submitAdminReply = async function() {
