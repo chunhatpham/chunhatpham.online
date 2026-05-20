@@ -238,7 +238,16 @@ app.post('/api/auth/register', async (req, res) => {
         // Tự động cấp quyền admin nếu tên tài khoản có chứa chữ "admin" (Bạn có thể đổi logic này sau)
         const role = username.toLowerCase().includes('admin') ? 'admin' : 'user';
 
-        const newUser = new User({ phone, email, username, password: hashedPassword, walletBalance: 0, role: role });
+        const newUser = new User({ 
+            phone, 
+            email, 
+            username, 
+            password: hashedPassword, 
+            walletBalance: 0, 
+            role: role,
+            isPremium: false,
+            premiumTier: 'none'
+        });
         await newUser.save(); 
         res.status(201).json({ 
             message: "Đăng ký tài khoản thành công!", 
@@ -253,7 +262,10 @@ app.post('/api/auth/register', async (req, res) => {
                 noAdsExpiry: newUser.noAdsExpiry
             } 
         });
-    } catch (error) { res.status(500).json({ message: "Lỗi hệ thống máy chủ!" }); }
+    } catch (error) { 
+        console.error("LỖI ĐĂNG KÝ BACKEND:", error);
+        res.status(500).json({ message: "Lỗi hệ thống: " + (error.message || error) }); 
+    }
 });
 
 app.post('/api/auth/login', async (req, res) => {
@@ -279,7 +291,10 @@ app.post('/api/auth/login', async (req, res) => {
             message: `Chào mừng ${user.username} quay trở lại!`,
             user: { username: user.username, phone: user.phone, email: user.email, walletBalance: user.walletBalance, isPremium: user.isPremium, premiumTier: user.premiumTier, premiumExpiry: user.premiumExpiry, noAdsExpiry: user.noAdsExpiry, role: user.role }
         });
-    } catch (error) { res.status(500).json({ message: "Lỗi hệ thống máy chủ!" }); }
+    } catch (error) { 
+        console.error("LỖI ĐĂNG NHẬP BACKEND:", error);
+        res.status(500).json({ message: "Lỗi hệ thống: " + (error.message || error) }); 
+    }
 });
 
 // ==========================================

@@ -368,7 +368,7 @@ window.openPlayer = function(movieSlug) {
         document.getElementById('lm-likes-count').innerText = movie.likes || 0;
         document.getElementById('lm-views-count').innerText = (movie.views || 0) + 1; // +1 giả định để tạo hiệu ứng lên view
         // Gọi API tăng View âm thầm
-        fetch(`http://localhost:5000/api/movies/${movie.slug}/view`, { method: 'POST' }).catch(e=>{});
+        fetch(`https://chunhatpham-online.onrender.com/api/movies/${movie.slug}/view`, { method: 'POST' }).catch(e=>{});
     } else {
         // Fallback bảo vệ giao diện: Nếu phim chưa có trong Database, tìm ảnh trên màn hình để load tạm
         try { if (window.event && window.event.currentTarget) { let imgEl = window.event.currentTarget.querySelector('img'); if (imgEl) movieImg = imgEl.src; } } catch(e) {}
@@ -774,7 +774,7 @@ window.handleLogin = async function() {
             }
         } catch (error) {
             console.error('Login error:', error);
-            showNotification('error', 'Mất Kết Nối', 'Không thể kết nối đến Máy chủ. Vui lòng kiểm tra lại!', 'Đã hiểu');
+            showNotification('error', 'Hệ Thống Đang Ngủ', 'Máy chủ đang khởi động lại. Vui lòng đợi khoảng 1 phút rồi bấm Đăng Nhập lại nhé!', 'Đã hiểu');
         }
     }, 600);
 };
@@ -852,11 +852,17 @@ window.handleRegisterFinal = async function() {
                 checkAuthStatus();
                 syncPremiumUI();
             } else {
-                showNotification('error', 'Lỗi Đăng Ký', data.message, 'Thử lại');
+                if (data.message === "Lỗi hệ thống máy chủ!") {
+                    showNotification('error', 'Lỗi Đám Mây (Render.com)', 'CẢNH BÁO: Máy chủ Render của bạn đang bị kẹt ở bản code cũ. Vui lòng đăng nhập vào web Render.com, chọn Manual Deploy -> Clear build cache & deploy để khởi động lại máy chủ!', 'Đã hiểu');
+                } else if (data.message.includes("E11000")) {
+                    showNotification('error', 'Trùng Dữ Liệu', 'Email hoặc SĐT này đã từng được đăng ký trong hệ thống. Vui lòng thử tạo tài khoản bằng một SĐT và Email hoàn toàn mới (VD: test12345@gmail.com - 0399887766).', 'Thử lại');
+                } else {
+                    showNotification('error', 'Lỗi Đăng Ký', "Chi tiết từ Server: " + data.message, 'Đã hiểu');
+                }
             }
         } catch (error) {
             console.error('Register error:', error);
-            showNotification('error', 'Mất Kết Nối', 'Không thể kết nối đến Máy chủ. Vui lòng bật Server ở cổng 5000!', 'Đã hiểu');
+            showNotification('error', 'Hệ Thống Đang Ngủ', 'Máy chủ đang khởi động lại. Vui lòng đợi khoảng 1 phút rồi bấm Đăng Ký lại nhé!', 'Đã hiểu');
         }
     }, 800);
 };
