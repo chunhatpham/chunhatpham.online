@@ -341,16 +341,117 @@ window.openPlayer = function(movieSlug) {
             audioLink = movie.seasons[i-1].episodes[0].audioUrl || "";
         }
         
-        if(i === 1) {
-            // SS1 Luôn play được (Dùng link mặc định nếu ko có)
-            let safeLink = audioLink || "https://files.catbox.moe/cikmvt.m4a";
-            seasonsHtml += `<button class="ss-btn ss-btn-play" onclick="playAudioSeason('${safeLink}', '${movieTitle}', '${movieImg}', false)"><span><i class="fas fa-play-circle"></i> Phần ${i}</span> <span>Phát ngay</span></button>`;
-        } else if (i === 2) {
-            // SS2: Nghe bình thường NẾU CÓ LINK, nếu không thì báo "Đang cập nhật"
-            if(audioLink) {
+        // Lọc bỏ file âm thanh mặc định bị trùng lặp
+        if(audioLink === "https://files.catbox.moe/cikmvt.m4a") audioLink = "";
+        
+        // ----- BẮT ĐẦU: KHÔI PHỤC ÂM THANH GỐC CHO CÁC PHIM CŨ -----
+        if (i === 1 && audioLink === "") {
+            const fallbackMap = {
+                'Hoa Khôi Đã Có Em Bé': "https://videotourl.com/audio/1779002003624-511d1962-2a5f-4662-8950-4727cecf00cb.m4a",
+                'Điều Bí Ẩn Trong Truyền Thuyết': "https://videotourl.com/audio/1779001858015-891b7581-070f-446e-aa3a-d2a5b2ea4d0c.m4a",
+                'Bạn Gái Gửi Nhờ Con Gái': "https://videotourl.com/audio/1778912532488-dbd61604-387a-4da9-ab25-2abec9ea9072.m4a",
+                'Vợ Của Tôi Mắc Bệnh': "https://videotourl.com/audio/1778912384799-73c55bde-b0f0-4bcd-9ac0-d3fc0170c138.m4a",
+                'Tôi Từ Bỏ Chị Mình': "https://videotourl.com/audio/1778820581886-8c11a88b-7f40-48c8-9b0c-93ddb7b8e7a8.m4a",
+                'Bạn Gái Là Do Tôi Nhặt Được': "https://videotourl.com/audio/1778755421125-a8562e4e-e9ec-4e1d-9d76-34eb31461ff5.m4a",
+                'Tôi Được Đưa Đến Cạnh Em': "https://videotourl.com/audio/1778683416286-6590e204-2ae2-45a9-9593-0baf5e08fce9.m4a",
+                'Cứu Được Hoa Khôi Trường': "https://videotourl.com/audio/1778682831898-ac1e91a5-eac9-4bbb-b47d-dee171cfd1fb.m4a",
+                'Đồ Quý Giá Của Tiểu Thư': "https://videotourl.com/audio/1778610249666-9aa58abd-fb64-4067-a0db-7fd57bc8f583.m4a",
+                'Bám Lấy Bạn Gái Xã Hội': "https://videotourl.com/audio/1778456245230-085a9567-3bdb-4901-aabc-38a7c8620408.m4a",
+                'Mẹ Tìm Người Dám Sát Tôi': "https://videotourl.com/audio/1778453856812-c4382dfb-9aa7-4c6a-bcea-099753158e25.m4a",
+                'Đại Tiểu Thư Không Yêu Tôi': "https://videotourl.com/audio/1778257761898-f7cee7e2-d150-4b17-9e9c-5b703659ebd6.m4a",
+                'Bố Giúp Tôi Lấy Con Gái Của Bạn': "https://videotourl.com/audio/1778257518578-f16225e8-48f0-4f7f-9d5a-a959eeabe872.m4a",
+                'Hoa Khôi Quá Bám Tôi': "https://videotourl.com/audio/1778257224492-46d0d8a5-cdf5-44d1-97a3-32bb4ad85e87.m4a",
+                'Tôi Kéo Được Tình Yêu Nhưng': "https://videotourl.com/audio/1777909664228-752aa7b4-f35c-40af-83ea-8c71887e5482.m4a",
+                'Mập Mờ Với Con Thầy Giáo': "https://videotourl.com/audio/1777829654952-31035f14-1573-4de6-b998-4609f1d0387c.m4a",
+                'Nghi Ngờ Bạn Gái Trọng Sinh': "https://videotourl.com/audio/1777829499456-5489afbf-69da-4148-8161-fb5d29d4f17b.m4a",
+                'Bạn Gái Tôi Xinh Nhất': "https://videotourl.com/audio/1777829309308-30991d93-2434-4d3c-accf-e5156d6196cf.m4a",
+                'Cô Bạn Gái Nói Dối Tô': "https://videotourl.com/audio/1777654118551-776f3635-5618-465a-8b2e-bd379f83997a.m4a",
+                'Chuyến Tàu Đầy Định Mệnh': "https://videotourl.com/audio/1777563466161-9f448c73-e9d3-43b0-9f0b-beaddccd6771.m4a",
+                'Tôi Đã Quên Vị Hôn Thê': "https://videotourl.com/audio/1777563294530-0941563f-74a5-45d5-b13c-aaa9d93adb44.m4a",
+                'Hoa Khôi Mất Thính Lực': "https://videotourl.com/audio/1777323431832-c2b19ee8-57c8-42cb-9e79-ca841c4e67d5.m4a",
+                'Bạn Gái Cố Tình Làm Tôi Ghen': "https://videotourl.com/audio/1777323290605-87694d97-70a3-41cb-a6ce-c5a4d70f5d67.m4a",
+                'Cô Gái Tôi Cứu Ép Buộc Tôi': "https://videotourl.com/audio/1777207520610-91f0c7aa-d278-494f-8dae-59dc069061a4.m4a",
+                'Quay Trở Lại Nhà Mình': "https://videotourl.com/audio/1777207384337-99a13b6f-ab3e-4f35-8aa0-feeda5303f0a.m4a",
+                'Xem Bói Giúp Nữ Tổng Tài': "https://videotourl.com/audio/1777207234445-ae2ca984-94bc-450a-ba16-6c7b91708aab.m4a",
+                'Anh Ấy Bỏ Tôi Mà Đi': "https://videotourl.com/audio/1777106025510-9b2d10aa-bdd8-4899-a57e-7a2a0e3948a4.m4a",
+                'Em Bị Vào Tròng Rồi': "https://videotourl.com/audio/1776962266491-54fc6a82-42c4-456f-81d3-7dd8872a5cbb.m4a",
+                'Bố Tôi Trả Góp Ô Tô': "https://videotourl.com/audio/1776864073703-bf183d4d-5218-4cb6-9da6-aae32bdae668.m4a",
+                'Bài Kiểm Tra Của Thanh Mai': "https://files.catbox.moe/9g602v.m4a",
+                'Mẹ Ra Lệnh Cho Tôi': "https://videotourl.com/audio/1776530460630-bd9245ca-6efb-4a34-b65a-da78024d2c2a.m4a",
+                'Bố Và Mẹ Của Tôi Nhất': "https://videotourl.com/audio/1776432062804-f2b89215-56fc-4095-a140-b6d97124ac33.m4a",
+                'Tôi Là Phản Diện Mạnh Nhất': "https://files.catbox.moe/zucqh3.m4a",
+                'Bỏ Vợ Và Ra Đi': "https://videotourl.com/audio/1776262171928-8b43c1f4-f5e4-4408-8be4-2c9ea4363953.m4a",
+                'Người Yêu Ngày Cha Qua Đời': "https://videotourl.com/audio/1776244432440-7a75ed7b-fb88-4b87-a2d3-e02ed389e09d.m4a",
+                'Chặn Đầu Xe Ô Tô': "https://files.catbox.moe/7nchf3.m4a",
+                'Chân Sai Vặt Của Họ': "https://videotourl.com/audio/1776160704336-d2bd4ada-a7a2-4be0-8f73-2f841d44a479.m4a",
+                'Bạn Thân Người Yêu Cũ': "https://videotourl.com/audio/1776082105166-6c8a7cb4-ac2f-47ed-907c-6825925b9c04.m4a",
+                'Hoán Đổi Thân Thế Rồi': "https://videotourl.com/audio/1776064995813-b41fff28-b39a-4a40-a480-fd5ebe0ba0a0.m4a",
+                'Tôi Buổi Tối Hôm Đấy': "https://videotourl.com/audio/1776011213200-b173f4aa-dfa4-4031-aaa9-114dbef99e2b.m4a",
+                'Ra Đi Để Giữ Lại': "https://pub-af59ef8bd16249ba9a926f943a92e17e.r2.dev/audio/1775982846211-a3c28bef-c8e5-4e63-bd70-db4ed76f1acd.m4a",
+                'Sự Kiện Cho Đàn Ông': "https://files.catbox.moe/o68ce7.m4a",
+                'Tôi Kháng Lại Tất Cả': "https://files.catbox.moe/kdw1b7.m4a",
+                'Hoa Khôi Cố Gắng Tìm': "https://files.catbox.moe/xxi9wn.m4a",
+                'Người Cuồng Em Trai Nhất': "https://files.catbox.moe/3a8mwe.m4a",
+                'Chị Gái Của Tôi Mà': "https://files.catbox.moe/hlvkim.m4a",
+                'Vợ Tôi Lạnh Lùng Quá': "https://files.catbox.moe/q3ey2e.m4a",
+                'Ngày Bạn Gái Rời Đi': "https://files.catbox.moe/iu7pts.m4a",
+                'Người Bố Chức Bí Mật': "https://files.catbox.moe/ucs440.m4a",
+                'Các Chị Gái Của Tôi': "https://files.catbox.moe/4skfsa.m4a",
+                'Hình Mẫu Của Tôi Đấy': "https://files.catbox.moe/obh6yf.m4a",
+                'Gặp Gỡ Với Hoa Khôi': "https://files.catbox.moe/7y3ybi.m4a",
+                'Rời Xa Khỏi Vợ Mình': "https://files.catbox.moe/oznaow.m4a",
+                'Ngày Đầu Tôi Trở Về Nhà': "https://files.catbox.moe/0fdp29.m4a",
+                'Cô Gái Tìm Kiếm Tôi': "https://files.catbox.moe/h59z4p.m4a",
+                'Tôi Là Nỗi Sợ Hãi': "https://files.catbox.moe/785q30.m4a",
+                'Lời Dạy Bảo Của Mẹ': "https://files.catbox.moe/w9ixrh.m4a",
+                'Bạn Thân Của Chị Gái': "https://files.catbox.moe/ay2a8b.m4a",
+                'Tôi Trở Thành Tỉ Phú': "https://files.catbox.moe/h4o7kp.m4a",
+                'Ba Em Gái Của Tôi': "https://files.catbox.moe/es2ova.m4a",
+                'Bạn Gái Cũ Chứng Minh': "https://files.catbox.moe/xxdgmx.m4a",
+                'Tôi Cố Gắng Chịu Đựng': "https://files.catbox.moe/5hyn63.m4a",
+                'Bài Mới Của Bạn Gái': "https://files.catbox.moe/mkhu1m.m4a",
+                'Tiểu Thuyết Của Nam Chính': "https://files.catbox.moe/fu91o7.m4a",
+                'Vợ Tổng Tài Của Tôi': "https://files.catbox.moe/ytmvfv.m4a",
+                'Chấm Dứt Với Gia Đình': "https://files.catbox.moe/uz5ky7.m4a",
+                'Cố Gắng Rời Xa Em': "https://files.catbox.moe/saltg1.m4a",
+                'Chị Gái Nằm Với Tôi': "https://files.catbox.moe/nzldnc.m4a",
+                'Cha Mẹ Bắt Tôi Về': "https://files.catbox.moe/sgv8s9.m4a",
+                'Chị Gái Loại Bỏ Tôi': "https://files.catbox.moe/9qspdw.m4a",
+                'Tôi Đã Bị Thay Thế': "https://files.catbox.moe/0ibes6.m4a",
+                'So Tài Với Trà Xanh': "https://files.catbox.moe/mywlgy.m4a",
+                'Bắt Nạt Cô Thanh Mai': "https://files.catbox.moe/prwwla.m4a",
+                'Tôi Tránh Xa Thanh Mai': "https://files.catbox.moe/99ni7p.m4a",
+                'Đã Thật Lòng Với': "https://files.catbox.moe/c5da2s.m4a",
+                'Trợt Tỉnh Ra Sự Thật': "https://files.catbox.moe/69m56t.m4a",
+                'Lấy Hoa Khôi Lạnh Lùng': "https://files.catbox.moe/2v33j0.m4a",
+                'Nữ Thần Liễu Như Yên': "https://files.catbox.moe/gpnwng.m4a",
+                'Tôi Nằm Trên Ván Cược': "https://files.catbox.moe/r433x2.m4a",
+                'Tái Sinh Cùng Vợ Mình': "https://files.catbox.moe/csl5c0.m4a",
+                'Không Cùng Thế Giới Mà': "https://files.catbox.moe/66zbhz.m4a",
+                'Hoàn Hảo Với Em Gái': "https://files.catbox.moe/r1mu02.m4a",
+                'Hẹn Hò Với Nữ Minh Tinh': "https://files.catbox.moe/3hfxx5.m4a",
+                'Nấu Ăn Để Câu Cá': "https://files.catbox.moe/t56bql.m4a",
+                'Bảo Vệ Mẹ Mình Khỏi': "https://files.catbox.moe/dxfojg.mp3",
+                'Hôn Em Một Cái Thôi Mà': "https://files.catbox.moe/sv2cyf.m4a",
+                'Họ Cứ Nghĩ Tôi Theo Em': "https://files.catbox.moe/8jw1g0.mp3",
+                'Chuyển Tới Lớp Với Thanh Mai': "https://files.catbox.moe/cikmvt.m4a"
+            };
+            
+            for (const [key, url] of Object.entries(fallbackMap)) {
+                if (movieTitle.includes(key)) {
+                    audioLink = url;
+                    break;
+                }
+            }
+        }
+        // ----- KẾT THÚC KHÔI PHỤC ÂM THANH -----
+        
+        if(i === 1 || i === 2) {
+            // SS1 và SS2: Nghe bình thường NẾU CÓ LINK THẬT, nếu không thì báo "Đang cập nhật"
+            if(audioLink && audioLink.trim() !== "") {
                 seasonsHtml += `<button class="ss-btn ss-btn-play" onclick="playAudioSeason('${audioLink}', '${movieTitle}', '${movieImg}', false)"><span><i class="fas fa-play-circle"></i> Phần ${i}</span> <span>Phát ngay</span></button>`;
             } else {
-                seasonsHtml += `<button class="ss-btn ss-btn-update" onclick="showNotification('info', 'Thông Báo', 'Phần 2 của phim này đang được cập nhật. Vui lòng quay lại sau!', 'Đã hiểu')"><span><i class="fas fa-tools"></i> Phần ${i}</span> <span>Đang cập nhật</span></button>`;
+                seasonsHtml += `<button class="ss-btn ss-btn-update" onclick="showNotification('info', 'Thông Báo', 'Phần ${i} của phim này đang được cập nhật. Vui lòng quay lại sau!', 'Đã hiểu')"><span><i class="fas fa-tools"></i> Phần ${i}</span> <span>Đang cập nhật</span></button>`;
             }
         } else {
             // SS3, 4, 5: LUÔN KHÓA PREMIUM
