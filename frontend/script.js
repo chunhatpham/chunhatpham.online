@@ -35,7 +35,7 @@ window.renderLatestMovies = function() {
     // Lấy chính xác 20 phim mới nhất theo thứ tự gốc
     let displayMovies = window.realMoviesDatabase.slice(0, 20);
     latestGrid.innerHTML = displayMovies.map(movie => `
-        <div class="movie-card" onclick="openPlayer('${movie.slug}')">
+        <div class="movie-card" data-slug="${movie.slug}" onclick="openPlayer('${movie.slug}')">
             <img src="${movie.coverImg}" alt="${movie.title}">
             <div class="new-badge-tag">${movie.tag}</div>
             <div class="card-overlay"><h3>${movie.title}</h3><span style="color: #38ef7d;"><i class="fas fa-play-circle"></i> ${movie.description || 'Vừa ra mắt'}</span></div>
@@ -47,29 +47,22 @@ window.renderMoviesByPage = function(page) {
     const pagedGrid = document.getElementById('paged-movie-grid');
     if (!pagedGrid) return;
     const startIndex = (page - 1) * 10; 
-    const endIndex = Math.min(page * 10, 1000) - 1;
+    // CẬP NHẬT: Tính toán điểm dừng dựa trên số lượng phim THỰC TẾ
+    const endIndex = Math.min(page * 10, window.realMoviesDatabase.length) - 1;
     let html = '';
     for (let i = startIndex; i <= endIndex; i++) {
-        if (i < window.realMoviesDatabase.length) {
-            let movie = window.realMoviesDatabase[i];
-            html += `<div class="movie-card dynamic-page-card" onclick="openPlayer('${movie.slug}')">
-                <img src="${movie.coverImg}"><div class="movie-index-badge" style="background: var(--primary-color);">#${i + 1}</div>
-                <div class="card-overlay"><h3>${movie.title}</h3><span style="color: #38ef7d;"><i class="fas fa-play-circle"></i> ${movie.views} Lượt xem</span></div>
-            </div>`;
-        } else {
-            html += `<div class="movie-card dynamic-page-card card-updating" onclick="showNotification('info', 'Thông Báo', 'Phim Số ${i + 1} đang chuẩn bị.', 'Đã hiểu')">
-                <img src="https://i.postimg.cc/BZTQdwdb/56575EA9-6C1E-453E-A0EE-628BF972D3E7.png">
-                <div class="movie-index-badge" style="background: rgba(11,11,12,0.8); color: #888;">#${i + 1}</div>
-                <div class="locked-icon-overlay" style="color: rgba(255,255,255,0.2);"><i class="fas fa-tools"></i></div>
-                <div class="card-overlay"><h3 style="color: #888;">Tác Phẩm Số ${i + 1}</h3><span style="color: #555;">Đang Cập Nhật...</span></div>
-            </div>`;
-        }
+        let movie = window.realMoviesDatabase[i];
+        html += `<div class="movie-card dynamic-page-card" data-slug="${movie.slug}" onclick="openPlayer('${movie.slug}')">
+            <img src="${movie.coverImg}"><div class="movie-index-badge" style="background: var(--primary-color);">#${i + 1}</div>
+            <div class="card-overlay"><h3>${movie.title}</h3><span style="color: #38ef7d;"><i class="fas fa-play-circle"></i> ${movie.views} Lượt xem</span></div>
+        </div>`;
     }
     pagedGrid.innerHTML = html;
 };
 
 function renderPagination(page) {
-    const TOTAL_PAGES = 100; // 1000 movies / 10 per page
+    // CẬP NHẬT: Tự động chia số trang theo số lượng phim đang có
+    const TOTAL_PAGES = Math.ceil(window.realMoviesDatabase.length / 10) || 1;
     const paginationWrapper = document.getElementById('pagination-wrapper');
     if(!paginationWrapper) return;
     let html = '';
@@ -157,56 +150,16 @@ window.executeSearch = function() {
                 tooltip.innerText = `Đã tìm thấy: ${movie.title}`;
                 foundCard.appendChild(tooltip);
 
-                showNotification('success', 'Tìm Kiếm Thành Công', `Bạn đã tìm đến bộ phim này: "${movie.title}". Xin hãy chọn vào khung phim đang sáng viền nhấp nháy để xem nhé!`, 'Đã hiểu');
+                    showNotification('success', 'Tìm Kiếm Thành Công', `Bạn đã tìm đến bộ phim: "${movie.title}". Xin hãy nhấp vào khung phim đang sáng nhấp nháy để xem nhé!`, 'Tuyệt vời');
 
                 setTimeout(() => {
                     foundCard.classList.remove('search-highlight');
                     if(tooltip) tooltip.remove();
-                }, 6000);
-            }
-        }, 300);
-
-    } else {
-        let allCards = document.querySelectorAll('#tab-home .movie-card');
-        let foundCard = null;
-        let foundTitle = "";
-
-        for(let card of allCards) {
-            let titleEl = card.querySelector('h3');
-            if(!titleEl) continue;
-            let title = titleEl.innerText;
-            if (normalizeVietnamese(title).includes(normalizedInput)) {
-                foundCard = card;
-                foundTitle = title;
-                break;
-            }
-        }
-
-        if(foundCard) {
-            openTab('tab-home');
-            setTimeout(() => {
-                foundCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                document.querySelectorAll('.movie-card').forEach(c => {
-                    c.classList.remove('search-highlight');
-                    let oldTooltip = c.querySelector('.search-tooltip');
-                    if(oldTooltip) oldTooltip.remove();
-                });
-                foundCard.classList.add('search-highlight');
-                let tooltip = document.createElement('div');
-                tooltip.className = 'search-tooltip';
-                tooltip.innerText = `Đã tìm thấy: ${foundTitle}`;
-                foundCard.appendChild(tooltip);
-
-                showNotification('success', 'Tìm Kiếm Thành Công', `Bạn đã tìm đến bộ phim này: "${foundTitle}". Xin hãy chọn vào khung phim đang sáng viền nhấp nháy để xem nhé!`, 'Đã hiểu');
-
-                setTimeout(() => {
-                    foundCard.classList.remove('search-highlight');
-                    if(tooltip) tooltip.remove();
-                }, 6000);
-            }, 300);
+                    }, 6000);
+                }
+            }, 400); // Tăng thời gian đợi để web render trang chứa phim kịp thời
         } else {
-            showNotification('info', 'Thông Báo Tìm Kiếm', 'Cảm ơn sự tìm kiếm của bạn, chúng tôi đang cập nhật phim mà bạn yêu cầu một cách sớm nhất ạ.', 'Đã hiểu');
-        }
+            showNotification('info', 'Không Tìm Thấy', 'Cảm ơn bạn, chúng tôi hiện chưa có phim này và sẽ cố gắng cập nhật sớm nhất ạ.', 'Đã hiểu');
     }
 };
 
