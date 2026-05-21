@@ -768,6 +768,36 @@ app.put('/api/admin/user/:username', async (req, res) => {
     } catch (error) { res.status(500).json({ message: "Lỗi hệ thống!" }); }
 });
 
+// API CẤP/NÂNG THÊM NGÀY PREMIUM CHO USER (ADMIN)
+app.post('/api/admin/add-premium-days', async (req, res) => {
+    try {
+        const { targetUsername, packageType, tier, addDays } = req.body;
+        const user = await User.findOne({ username: targetUsername });
+        if (!user) return res.status(404).json({ message: "Không tìm thấy người dùng này!" });
+
+        const days = parseInt(addDays);
+        if (isNaN(days) || days <= 0) return res.status(400).json({ message: "Số ngày không hợp lệ. Vui lòng nhập số lớn hơn 0!" });
+
+        if (packageType === 'premium') {
+            user.isPremium = true;
+            user.premiumTier = tier;
+            let baseDate = (user.premiumExpiry && new Date(user.premiumExpiry) > new Date()) ? new Date(user.premiumExpiry) : new Date();
+            baseDate.setDate(baseDate.getDate() + days);
+            user.premiumExpiry = baseDate;
+        } else if (packageType === 'noads') {
+            let baseDate = (user.noAdsExpiry && new Date(user.noAdsExpiry) > new Date()) ? new Date(user.noAdsExpiry) : new Date();
+            baseDate.setDate(baseDate.getDate() + days);
+            user.noAdsExpiry = baseDate;
+        }
+
+        await user.save();
+        res.status(200).json({ success: true, message: `Đã cộng thêm ${days} ngày cho tài khoản ${user.username}!` });
+    } catch (error) { 
+        console.error(error);
+        res.status(500).json({ message: "Lỗi hệ thống!" }); 
+    }
+});
+
 app.get('/api/admin/tickets', async (req, res) => {
     try {
         // Loại bỏ trường ảnh Base64 khổng lồ bằng select('-image') để chống sập Server và tải cực nhanh

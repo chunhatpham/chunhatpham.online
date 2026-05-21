@@ -727,6 +727,8 @@
                     <button class="admin-tab-btn active" onclick="switchAdminTab('users')"><i class="fas fa-user-shield"></i> Quản Lý Tài Khoản</button>
                     <button class="admin-tab-btn" onclick="switchAdminTab('transactions')"><i class="fas fa-university"></i> Lịch Sử Ngân Hàng</button>
                     <button class="admin-tab-btn" onclick="switchAdminTab('tickets')"><i class="fas fa-headset"></i> Hộp Thư Hỗ Trợ</button>
+                    <button class="admin-tab-btn" onclick="switchAdminTab('tiers')"><i class="fas fa-crown"></i> Cấp Tài Khoản</button>
+                    <button class="admin-tab-btn" onclick="switchAdminTab('deposits')"><i class="fas fa-chart-pie"></i> Tổng Tiền Nạp</button>
                 </div>
 
                 <div class="admin-panel-content">
@@ -795,6 +797,26 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- TAB 4: CẤP TÀI KHOẢN (VIP/NO ADS) -->
+                    <div id="admin-tab-tiers" class="admin-sub-tab">
+                        <div class="admin-table-wrapper">
+                            <table class="admin-table">
+                                <thead><tr><th>Tài khoản</th><th>Gói Dịch Vụ</th><th>Thời Hạn (Còn Lại)</th><th>Ngày Hết Hạn</th><th>Hành động</th></tr></thead>
+                                <tbody id="admin-tier-tbody"><tr><td colspan="5" style="text-align:center;">Đang tải...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- TAB 5: TỔNG TIỀN NẠP -->
+                    <div id="admin-tab-deposits" class="admin-sub-tab">
+                        <div class="admin-table-wrapper">
+                            <table class="admin-table">
+                                <thead><tr><th>Top Nạp</th><th>Tài khoản</th><th>SĐT / Email</th><th>Tổng Tiền Đã Nạp</th><th>Số Dư Hiện Tại</th></tr></thead>
+                                <tbody id="admin-deposit-tbody"><tr><td colspan="5" style="text-align:center;">Đang tải...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -836,6 +858,35 @@
                 </div>
                 <div class="modal-footer">
                     <button class="auth-btn" style="background: linear-gradient(45deg, #00c6ff, #0072ff);" onclick="submitEditUser()">Lưu Thay Đổi</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL CẤP PREMIUM THEO NGÀY (ADMIN) -->
+        <div class="global-modal-overlay" id="admin-add-premium-modal">
+            <div class="global-modal-box" style="width: 450px;">
+                <button class="modal-close-icon" onclick="document.getElementById('admin-add-premium-modal').classList.remove('show')"><i class="fas fa-times"></i></button>
+                <div class="modal-header"><i class="fas fa-gift" style="color:#f5c518"></i><h2 style="color: white;">Tặng/Nâng Cấp Gói</h2></div>
+                <div class="modal-body">
+                    <p style="text-align: left; margin-bottom: 5px;">Tài khoản nhận:</p>
+                    <input type="text" id="admin-prem-target" class="auth-input" readonly style="color: #00e676; font-weight: bold; background: rgba(0,0,0,0.5);">
+                    
+                    <p style="text-align: left; margin-bottom: 5px;">Loại gói:</p>
+                    <select id="admin-prem-type" class="auth-input" style="margin-bottom: 15px;" onchange="if(this.value==='noads') document.getElementById('admin-prem-tier-wrapper').style.display='none'; else document.getElementById('admin-prem-tier-wrapper').style.display='block';">
+                        <option value="premium">Gói Premium (Full Video/Audio)</option>
+                        <option value="noads">Gói Tắt Quảng Cáo Thường</option>
+                    </select>
+                    
+                    <div id="admin-prem-tier-wrapper">
+                        <p style="text-align: left; margin-bottom: 5px;">Cấp bậc Premium (Chỉ áp dụng gói Premium):</p>
+                        <select id="admin-prem-tier" class="auth-input" style="margin-bottom: 15px;"><option value="bronze">Đồng</option><option value="silver">Bạc</option><option value="gold">Vàng</option><option value="diamond">Kim Cương</option></select>
+                    </div>
+                    
+                    <p style="text-align: left; margin-bottom: 5px; color: #f5c518;">Số ngày muốn cộng thêm:</p>
+                    <input type="number" id="admin-prem-days" class="auth-input" placeholder="VD: 2 (Cộng thêm 2 ngày)" style="border-color: #f5c518;">
+                </div>
+                <div class="modal-footer">
+                    <button class="auth-btn" style="background: linear-gradient(45deg, #f5c518, #ff9800); color: black;" onclick="submitAddPremiumDays()">Xác Nhận Cấp</button>
                 </div>
             </div>
         </div>

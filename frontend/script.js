@@ -1386,6 +1386,9 @@ window.loadAdminData = async function() {
 
     // Sau khi tải xong tất cả, tính toán thống kê mặc định (Hôm nay)
     filterAdminStats('today', document.querySelector('.time-filter-btn'));
+    
+    renderAdminTiers();
+    renderAdminDeposits();
 };
 
 window.filterAdminStats = function(period, btn) {
@@ -1511,6 +1514,87 @@ window.deleteUser = async function(username) {
         let data = await res.json();
         if(res.ok) { showNotification('success', 'Đã Xóa', data.message, 'OK'); loadAdminData(); }
     } catch(e) { showNotification('error', 'Lỗi', 'Lỗi kết nối máy chủ', 'Đóng'); }
+};
+
+// ================= CÁC TÍNH NĂNG MỚI CỦA QUẢN TRỊ CẤP CAO =================
+window.renderAdminTiers = function() {
+    let tHtml = '';
+    // Lọc ra các tài khoản đang có VIP hoặc Tắt Quảng Cáo
+    let activeUsers = window.adminFullData.users.filter(u => u.isPremium || (u.noAdsExpiry && new Date(u.noAdsExpiry) > new Date()));
+    
+    if(activeUsers.length > 0) {
+        activeUsers.forEach(u => {
+            let isVip = u.isPremium;
+            let tierLabel = isVip ? `<span style="color:#f5c518; font-weight:bold;"><i class="fas fa-crown"></i> Premium ${u.premiumTier.toUpperCase()}</span>` : `<span style="color:#00e676;"><i class="fas fa-ad"></i> Tắt Quảng Cáo</span>`;
+            let expiryDate = isVip ? new Date(u.premiumExpiry) : new Date(u.noAdsExpiry);
+            let diffTime = expiryDate.getTime() - new Date().getTime();
+            let daysLeft = Math.ceil(diffTime / (1000 * 3600 * 24));
+            let daysLeftHtml = daysLeft > 1000 ? '∞ (Vĩnh viễn)' : `<strong style="color: #00c6ff;">Còn ${daysLeft} ngày</strong>`;
+            
+            tHtml += `<tr>
+                <td style="color: white; font-weight: bold;">${u.username}</td>
+                <td>${tierLabel}</td>
+                <td>${daysLeftHtml}</td>
+                <td style="color:#aaa; font-size: 12px;">${expiryDate.toLocaleString('vi-VN')}</td>
+                <td><button class="btn-admin-action" style="background: linear-gradient(45deg, #f5c518, #ff9800); color: black;" onclick="openAddPremiumDaysModal('${u.username}')"><i class="fas fa-plus-circle"></i> Tặng/Cộng Ngày</button></td>
+            </tr>`;
+        });
+    }
+    let tBody = document.getElementById('admin-tier-tbody'); if(tBody) tBody.innerHTML = tHtml || '<tr><td colspan="5" style="padding: 30px; text-align: center; color: #888;">Chưa có tài khoản nào kích hoạt dịch vụ.</td></tr>';
+};
+
+window.renderAdminDeposits = function() {
+    let dHtml = '';
+    let depositData = [];
+    
+    // Tính tổng tiền nạp của mỗi User
+    window.adminFullData.users.forEach(u => {
+        // Tìm tất cả các giao dịch Nạp (+) liên quan đến SĐT của User này
+        let userTxs = window.adminFullData.transactions.filter(t => t.amount > 0 && t.contact === u.phone);
+        let totalDep = userTxs.reduce((sum, t) => sum + t.amount, 0);
+        
+        if(totalDep > 0) {
+            depositData.push({ username: u.username, phone: u.phone, email: u.email, totalDeposit: totalDep, balance: u.walletBalance });
+        }
+    });
+    
+    // Sắp xếp theo tổng tiền nạp giảm dần (Đại gia lên đầu)
+    depositData.sort((a, b) => b.totalDeposit - a.totalDeposit);
+    
+    if(depositData.length > 0) {
+        depositData.forEach((d, idx) => {
+            let rankLabel = idx === 0 ? '🥇 TOP 1' : (idx === 1 ? '🥈 TOP 2' : (idx === 2 ? '🥉 TOP 3' : `#${idx + 1}`));
+            let rankColor = idx === 0 ? '#ffd700' : (idx === 1 ? '#c0c0c0' : (idx === 2 ? '#cd7f32' : '#888'));
+            dHtml += `<tr>
+                <td style="color:${rankColor}; font-weight:bold; font-size:16px;">${rankLabel}</td>
+                <td style="color: white; font-weight: bold;">${d.username}</td>
+                <td style="color:#aaa; font-size:12px;">${d.phone}<br>${d.email}</td>
+                <td style="color:#00e676; font-weight:bold; font-size: 18px;">${d.totalDeposit.toLocaleString('vi-VN')} đ</td>
+                <td style="color:#ccc;">${d.balance.toLocaleString('vi-VN')} đ</td>
+            </tr>`;
+        });
+    }
+    let dBody = document.getElementById('admin-deposit-tbody'); if(dBody) dBody.innerHTML = dHtml || '<tr><td colspan="5" style="padding: 30px; text-align: center; color: #888;">Hệ thống chưa ghi nhận dòng tiền nạp nào.</td></tr>';
+};
+
+window.openAddPremiumDaysModal = function(username) {
+    document.getElementById('admin-prem-target').value = username;
+    document.getElementById('admin-prem-days').value = '';
+    document.getElementById('admin-add-premium-modal').classList.add('show');
+};
+
+window.submitAddPremiumDays = async function() {
+    let payload = { targetUsername: document.getElementById('admin-prem-target').value, packageType: document.getElementById('admin-prem-type').value, tier: document.getElementById('admin-prem-tier').value, addDays: document.getElementById('admin-prem-days').value };
+    if(!payload.addDays || payload.addDays <= 0) { showNotification('warning', 'Lỗi', 'Vui lòng nhập số ngày cần tặng hợp lệ!', 'Đã hiểu'); return; }
+    
+    window.executeWithLoading(async () => {
+        try {
+            let res = await fetch('https://chunhatpham-online.onrender.com/api/admin/add-premium-days', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            let data = await res.json();
+            if(res.ok) { showNotification('success', 'Thành Công', data.message, 'Đóng'); document.getElementById('admin-add-premium-modal').classList.remove('show'); loadAdminData(); }
+            else { showNotification('error', 'Lỗi', data.message, 'Đóng'); }
+        } catch(e) { showNotification('error', 'Lỗi Mạng', 'Không gọi được API', 'Đóng'); }
+    });
 };
 
 window.switchTicketTab = function(tabName, btn) {
