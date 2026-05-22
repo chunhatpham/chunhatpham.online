@@ -770,6 +770,9 @@ function checkAuthStatus() {
         
         updateAndSaveBalance(currentUser.walletBalance || 0);
         
+        if(typeof window.renderHistoryUI === 'function') window.renderHistoryUI();
+        if(typeof window.renderWalletOrders === 'function') window.renderWalletOrders();
+
         if(typeof window.renderPremiumTabUI === 'function') window.renderPremiumTabUI();
         if(typeof window.loadNotifications === 'function') window.loadNotifications();
         let adminItem = document.getElementById('menu-admin-item');
@@ -973,6 +976,15 @@ window.confirmDeposit = function() {
     // CÚ PHÁP CHUYỂN KHOẢN: NAP SĐT
     const transferContent = `NAP ${currentUser.phone}`; 
     
+    // TẠO ĐƠN NẠP TRẠNG THÁI "ĐANG CHỜ"
+    window.currentOrderId = Date.now();
+    let ordersKey = getHistoryKey('orders');
+    let orders = JSON.parse(localStorage.getItem(ordersKey)) || [];
+    orders.unshift({ id: window.currentOrderId, amount: window.pendingDepositAmount, status: 'pending', time: new Date().toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}) + ' - ' + new Date().toLocaleDateString('vi-VN') });
+    if(orders.length > 20) orders.pop();
+    localStorage.setItem(ordersKey, JSON.stringify(orders));
+    renderWalletOrders();
+
     // TẠO ẢNH QR ĐỘNG TỪ SEPAY API DÀNH RIÊNG CHO TÀI KHOẢN ẢO (VA)
     const qrUrl = `https://qr.sepay.vn/img?acc=${ACCOUNT_NO}&bank=${BANK_ID}&amount=${window.pendingDepositAmount}&des=${encodeURIComponent(transferContent)}`;
 
@@ -1044,6 +1056,15 @@ window.confirmDeposit = function() {
                 localStorage.setItem('cnp_current_user', JSON.stringify(data));
                 
                 window.updateAndSaveBalance(data.walletBalance);
+                
+                // CẬP NHẬT ĐƠN THÀNH CÔNG
+                if(window.currentOrderId) {
+                    let oList = JSON.parse(localStorage.getItem(ordersKey)) || [];
+                    let o = oList.find(x => x.id === window.currentOrderId);
+                    if(o) { o.status = 'success'; localStorage.setItem(ordersKey, JSON.stringify(oList)); }
+                    window.currentOrderId = null;
+                    renderWalletOrders();
+                }
                 addHistoryEntry('deposit', 'Nạp Tiền Tự Động', data.walletBalance - currentBalance, data.walletBalance);
                 
                 let successModal = document.getElementById('deposit-success-overlay'); 
@@ -1061,6 +1082,15 @@ window.closeOtpModal = function() {
     let otpModal = document.getElementById('otp-modal-overlay'); 
     if(otpModal) otpModal.classList.remove('show'); 
     if(paymentCheckInterval) clearInterval(paymentCheckInterval); 
+    
+    // NẾU KHÁCH TẮT BẢNG QR TRƯỚC KHI CÓ TIỀN VÀO -> BÁO ĐÃ HỦY ĐƠN
+    if(window.currentOrderId) {
+        let ordersKey = getHistoryKey('orders');
+        let oList = JSON.parse(localStorage.getItem(ordersKey)) || [];
+        let o = oList.find(x => x.id === window.currentOrderId);
+        if(o && o.status === 'pending') { o.status = 'cancelled'; localStorage.setItem(ordersKey, JSON.stringify(oList)); renderWalletOrders(); }
+        window.currentOrderId = null;
+    }
 };
 document.getElementById('otp-modal-overlay').addEventListener('click', function(e) { if(e.target === this) window.closeOtpModal(); });
 
@@ -1224,17 +1254,43 @@ window.processPayment = function() {
 };
 
 // ================= HISTORY LOGIC =================
+// Hàm phụ trợ tạo Key riêng cho từng Tài Khoản
+window.getHistoryKey = function(prefix) {
+    let user = JSON.parse(localStorage.getItem('cnp_current_user'));
+    return user ? `cnp_${prefix}_${user.username}` : `cnp_${prefix}_guest`;
+};
+
 window.addHistoryEntry = function(type, title, amountOrExtra, balanceAfter = 0, imgSrc = '') {
-    let history = JSON.parse(localStorage.getItem('cnp_user_history')) || [];
+    let key = getHistoryKey('history');
+    let history = JSON.parse(localStorage.getItem(key)) || [];
     if (type === 'watch') history = history.filter(item => item.title !== title);
     const newEntry = { id: Date.now(), type: type, title: title, time: (new Date()).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}) + ' - ' + (new Date()).toLocaleDateString('vi-VN'), amountOrExtra: amountOrExtra, balanceAfter: balanceAfter, imgSrc: imgSrc };
-    history.unshift(newEntry); if (history.length > 50) history.pop(); localStorage.setItem('cnp_user_history', JSON.stringify(history));
+    history.unshift(newEntry); if (history.length > 50) history.pop(); localStorage.setItem(key, JSON.stringify(history));
     if(typeof renderHistoryUI === 'function') renderHistoryUI();
+};
+
+window.renderWalletOrders = function() {
+    let container = document.getElementById('wallet-history-list');
+    if(!container) return;
+    let orders = JSON.parse(localStorage.getItem(getHistoryKey('orders'))) || [];
+    if(orders.length === 0) { container.innerHTML = '<p style="text-align:center; color:#888; padding: 20px;">Bạn chưa tạo đơn nạp nào.</p>'; return; }
+    
+    let html = '';
+    orders.forEach(o => {
+        let stClass = o.status === 'success' ? 'st-success' : (o.status === 'cancelled' ? 'st-cancelled' : 'st-pending');
+        let stText = o.status === 'success' ? 'Thành công' : (o.status === 'cancelled' ? 'Đã hủy' : 'Chờ thanh toán');
+        let icon = o.status === 'success' ? 'fa-check' : (o.status === 'cancelled' ? 'fa-times' : 'fa-spinner fa-spin');
+        html += `<div class="order-item">
+            <div class="o-left"><span class="o-amount">+ ${o.amount.toLocaleString('vi-VN')} đ</span><span class="o-time">${o.time}</span></div>
+            <div class="o-status ${stClass}"><i class="fas ${icon}"></i> ${stText}</div>
+        </div>`;
+    });
+    container.innerHTML = html;
 };
 
 window.renderHistoryUI = function() {
     const container = document.getElementById('main-history-list'); if (!container) return;
-    let history = JSON.parse(localStorage.getItem('cnp_user_history')) || [];
+    let history = JSON.parse(localStorage.getItem(getHistoryKey('history'))) || [];
     if (history.length === 0) { container.innerHTML = '<p style="text-align:center; color:#888; padding: 30px; font-style: italic;">Bạn chưa có hoạt động nào gần đây.</p>'; return; }
     let html = '';
     history.forEach((item, index) => {
@@ -1242,7 +1298,7 @@ window.renderHistoryUI = function() {
         if (item.type === 'watch') {
             let coverImg = item.imgSrc ? item.imgSrc : 'https://i.postimg.cc/BZTQdwdb/56575EA9-6C1E-453E-A0EE-628BF972D3E7.png';
             html += `<div class="history-item type-watch" style="animation-delay: ${delay}s;" onclick="openPlayer('${item.title}')">
-                <div class="hist-left"><div class="hist-img-preview"><img src="${coverImg}" alt="${item.title}"></div><div class="hist-details"><span class="hist-title">${item.title}</span><span class="hist-time"><i class="far fa-clock"></i> ${item.time}</span></div></div>
+                <div class="hist-left"><div class="hist-img-preview"><img src="${coverImg}" alt="${item.title}"></div><div class="hist-details"><span class="hist-title">${item.title}</span><span class="hist-time"><i class="fas fa-headphones" style="color: #f5c518;"></i> ${item.amountOrExtra} • <i class="far fa-clock"></i> ${item.time}</span></div></div>
                 <div class="hist-right"><div class="hist-val-watch" style="color: var(--primary-color); border-color: var(--primary-color); font-weight: bold; background: rgba(229,9,20,0.1);"><i class="fas fa-play-circle"></i> Xem Lại</div></div>
             </div>`;
         } else {
