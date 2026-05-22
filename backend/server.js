@@ -729,14 +729,18 @@ app.post('/api/admin/add-balance', async (req, res) => {
         
         if (!user) return res.status(404).json({ message: "Không tìm thấy người dùng này!" });
         
-        user.walletBalance += parseInt(amount);
+        const addAmt = Number(amount);
+        if (isNaN(addAmt) || addAmt <= 0) return res.status(400).json({ message: "Số tiền không hợp lệ!" });
+
+        user.walletBalance += addAmt;
         await user.save();
 
-        const newTx = new Transaction({ referenceCode: 'MANUAL_' + Date.now(), contact: user.phone, amount: parseInt(amount), content: 'Admin duyệt nạp thủ công' });
+        // Thêm chuỗi random vào referenceCode để chống lỗi trùng lặp khi thao tác nạp quá nhanh
+        const newTx = new Transaction({ referenceCode: 'MANUAL_' + Date.now() + '_' + Math.floor(Math.random() * 10000), contact: user.phone || user.username, amount: addAmt, content: 'Admin duyệt nạp thủ công' });
         await newTx.save();
 
-        res.status(200).json({ success: true, message: `Đã cộng ${amount}đ cho ${user.username}`, newBalance: user.walletBalance });
-    } catch (error) { res.status(500).json({ message: "Lỗi hệ thống!" }); }
+        res.status(200).json({ success: true, message: `Đã cộng ${addAmt.toLocaleString('vi-VN')}đ cho ${user.username}`, newBalance: user.walletBalance });
+    } catch (error) { console.error("Lỗi nạp tiền thủ công:", error); res.status(500).json({ message: "Lỗi hệ thống: " + (error.message || error) }); }
 });
 
 // API XÓA TÀI KHOẢN

@@ -1567,8 +1567,12 @@ window.openManualAddModal = function(username) {
     document.getElementById('admin-add-balance-modal').classList.add('show');
 };
 window.submitManualBalance = async function() {
-    let un = document.getElementById('admin-target-user').value; let amt = document.getElementById('admin-add-amount').value;
-    if(!amt || amt <= 0) { showNotification('warning', 'Lỗi', 'Nhập số tiền lớn hơn 0', 'OK'); return; }
+    let un = document.getElementById('admin-target-user').value; 
+    let rawAmt = document.getElementById('admin-add-amount').value;
+    
+    // Tự động nhận diện chữ 'k', dấu chấm, phẩy để chuyển thành số chuẩn
+    let amt = parseInt(rawAmt.toLowerCase().replace(/k/g, '000').replace(/[,.]/g, '').trim());
+    if(!amt || amt <= 0 || isNaN(amt)) { showNotification('warning', 'Lỗi', 'Vui lòng nhập số tiền hợp lệ (VD: 100000, 100k, 100.000)', 'OK'); return; }
     window.executeWithLoading(async () => {
         try {
             let res = await fetch('https://chunhatpham-online.onrender.com/api/admin/add-balance', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUsername: un, amount: amt }) });
@@ -1590,8 +1594,11 @@ window.openEditUserModal = function(username, balance, isPremium, tier) {
 
 window.submitEditUser = async function() {
     let un = document.getElementById('admin-edit-username').value;
+    let rawBal = document.getElementById('admin-edit-balance').value;
+    let parsedBal = parseInt(rawBal.toLowerCase().replace(/k/g, '000').replace(/[,.]/g, '').trim());
+
     let payload = {
-        newBalance: document.getElementById('admin-edit-balance').value,
+        newBalance: isNaN(parsedBal) ? 0 : parsedBal,
         isPremium: document.getElementById('admin-edit-ispremium').value,
         premiumTier: document.getElementById('admin-edit-tier').value,
         newPassword: document.getElementById('admin-edit-password').value
