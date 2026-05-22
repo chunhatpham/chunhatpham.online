@@ -709,23 +709,22 @@ const ACCOUNT_NO = "96886693012894";
 const ACCOUNT_NAME = "DINH ANH CHANG"; 
 let paymentCheckInterval = null; // Biến lưu trữ vòng lặp kiểm tra trạng thái
 
-// 🔴 TÍNH NĂNG ĐỒNG BỘ MONGODB 🔴
-window.syncUserToServer = async function() {
+// 🔴 KÉO DỮ LIỆU TỪ MÁY CHỦ VỀ ĐỂ ĐẢM BẢO CHÍNH XÁC SỐ TIỀN KHÁCH ĐÃ NẠP 🔴
+window.syncUserFromServer = async function() {
     let currentUser = JSON.parse(localStorage.getItem('cnp_current_user'));
     if (!currentUser) return;
     try {
-        await fetch('https://chunhatpham-online.onrender.com/api/user/update', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                username: currentUser.username,
-                walletBalance: currentUser.walletBalance,
-                isPremium: currentUser.isPremium || false,
-                premiumTier: currentUser.premiumTier || 'none'
-            })
-        });
-        console.log("Đã đồng bộ lên MongoDB thành công!");
-    } catch (error) { console.error("Lỗi đồng bộ lên Server:", error); }
+        let res = await fetch(`https://chunhatpham-online.onrender.com/api/user/${currentUser.username}`);
+        if (res.ok) {
+            let data = await res.json();
+            localStorage.setItem('cnp_current_user', JSON.stringify(data));
+            currentWalletBalance = data.walletBalance;
+            localStorage.setItem('cnp_wallet_balance', currentWalletBalance);
+            updateBalanceUI();
+            if (typeof window.renderPremiumTabUI === 'function') window.renderPremiumTabUI();
+            if (typeof window.syncPremiumUI === 'function') window.syncPremiumUI();
+        }
+    } catch (error) { console.error("Lỗi kéo dữ liệu Server:", error); }
 };
 
 function updateBalanceUI() {
@@ -745,7 +744,7 @@ window.updateAndSaveBalance = function(newBalance) {
     if (currentUser) {
         currentUser.walletBalance = newBalance;
         localStorage.setItem('cnp_current_user', JSON.stringify(currentUser));
-        window.syncUserToServer(); // GỌI LÊN MÁY CHỦ
+        // BỎ GỌI LÊN MÁY CHỦ VÌ NÓ SẼ GHI ĐÈ LÀM MẤT TIỀN NẠP THỦ CÔNG & AUTO BANK
     }
 };
 
@@ -1347,7 +1346,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     setTimeout(() => {
         let currentUser = JSON.parse(localStorage.getItem('cnp_current_user'));
-        if (currentUser) { window.updateAndSaveBalance(currentUser.walletBalance || 0); }
+        if (currentUser) { 
+            window.updateAndSaveBalance(currentUser.walletBalance || 0); 
+            window.syncUserFromServer(); // Lấy dữ liệu tiền và VIP mới nhất từ Server
+        }
     }, 200);
 
     // KIỂM TRA TRẠNG THÁI APP: Nếu đang mở từ Màn hình chính (Standalone) hoặc người dùng đã tắt bảng hướng dẫn
