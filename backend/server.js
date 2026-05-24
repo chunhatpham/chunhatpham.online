@@ -165,6 +165,7 @@ mongoose.connect(dbURI)
             
             // TÍNH NĂNG THÊM PHIM MỚI TỰ ĐỘNG (KHÔNG LÀM MẤT VIEW/LIKE CŨ)
             const newMoviesToAdd = [
+                ["Hai Cô Bạn Thay Lòng", "https://i.postimg.cc/kGJmxb02/gen.jpg", "https://videotourl.com/audio/1779608774536-c77c114a-ab90-4d2e-8379-5e5982821f1a.mp3", "https://videotourl.com/audio/1779608811663-37ee6e00-a93b-4db9-bb66-41104ecb75b6.mp3", "https://videotourl.com/audio/1779608859692-34736359-da86-45eb-b1d3-0ac050b3300d.mp3"],
                 ["Linh Hồn Liên Kết Với Em", "https://i.postimg.cc/jjJNspCj/gen.jpg", "https://videotourl.com/audio/1779554838966-8f83f565-ae20-4a8e-8e21-22fc31c44dbe.mp3", "https://videotourl.com/audio/1779554926909-99c41724-c6f4-4507-b3d4-45cdfb1d6a97.mp3", "https://videotourl.com/audio/1779554975300-9a773fd1-67ff-4db9-aa09-bde99d665905.mp3"],
                 ["Tôi Gom Tiền Để Cứu Mẹ", "https://i.postimg.cc/RVxtX6SM/gen.jpg", "https://videotourl.com/audio/1779458777407-9b9fc940-dfc9-41d6-a9fc-3abb1913b17e.mp3", "https://videotourl.com/audio/1779458831769-58c18c90-aa1c-4126-9596-66cab2177d5e.mp3", "https://videotourl.com/audio/1779458869267-11e44717-ec61-4443-89ea-fb0f69a49563.mp3"],
                 ["Con Vật Của Vợ Tôi", "https://i.postimg.cc/90rfwMm4/gen.jpg", "https://videotourl.com/audio/1779433448771-3fabbcc8-af83-42ea-bda9-117a8228f8c1.mp3", "https://videotourl.com/audio/1779433562034-57b904cf-7829-414a-9bec-b2ac35ea9911.mp3", "https://videotourl.com/audio/1779433672611-e187e9b9-e09e-4104-9afd-83cdf80c92e1.mp3"],
