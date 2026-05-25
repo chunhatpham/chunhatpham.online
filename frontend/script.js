@@ -1560,21 +1560,14 @@ window.filterAdminStats = function(period, btn) {
     let endDate;
 
     if (period === 'custom') {
-        const startVal = document.getElementById('admin-date-start').value;
-        const endVal = document.getElementById('admin-date-end').value;
-        if (!startVal || !endVal) {
-            showNotification('warning', 'Thiếu Thông Tin', 'Vui lòng chọn đầy đủ Ngày Bắt Đầu và Ngày Kết Thúc.', 'Đã hiểu');
+        if (!window.customStartDate || !window.customEndDate) {
+            showNotification('warning', 'Chưa Chọn Ngày', 'Vui lòng chọn khoảng thời gian để lọc.', 'Đã hiểu');
             return;
         }
-        startDate = new Date(startVal);
+        startDate = new Date(window.customStartDate);
         startDate.setHours(0, 0, 0, 0);
-        endDate = new Date(endVal);
+        endDate = new Date(window.customEndDate);
         endDate.setHours(23, 59, 59, 999);
-        
-        if (startDate > endDate) {
-            showNotification('warning', 'Lỗi', 'Ngày Bắt Đầu không thể lớn hơn Ngày Kết Thúc.', 'Đã hiểu');
-            return;
-        }
     } else {
         if (period === 'today') startDate = today;
         else if (period === 'yesterday') startDate = new Date(today.getTime() - 24 * 60 * 60 * 1000);
@@ -1585,10 +1578,8 @@ window.filterAdminStats = function(period, btn) {
 
         endDate = (period === 'yesterday') ? new Date(today.getTime() - 1) : new Date(now.getTime() + 1000);
         
-        let dStart = document.getElementById('admin-date-start');
-        let dEnd = document.getElementById('admin-date-end');
-        if (dStart) dStart.value = '';
-        if (dEnd) dEnd.value = '';
+        const customText = document.getElementById('custom-date-text');
+        if (customText) customText.innerText = 'Tùy Chỉnh';
     }
 
     const filteredUsers = window.adminFullData.users.filter(u => new Date(u.createdAt) >= startDate && new Date(u.createdAt) <= endDate);
@@ -1888,6 +1879,32 @@ window.openAdminReplyModal = function(ticketId) {
             showNotification('error', 'Lỗi Mạng', 'Không kết nối được với máy chủ', 'Đóng');
         }
     }, 100);
+
+    if (typeof flatpickr !== 'undefined') {
+        flatpickr("#btn-custom-date", {
+            mode: "range",
+            locale: "vn",
+            dateFormat: "d/m/Y",
+            disableMobile: true, // Ép dùng giao diện lịch chuyên nghiệp của Flatpickr trên Mobile
+            onClose: function(selectedDates) {
+                if (selectedDates.length > 0) {
+                    let startDate = selectedDates[0];
+                    let endDate = selectedDates.length > 1 ? selectedDates[1] : selectedDates[0];
+                    
+                    let text = (startDate.getTime() === endDate.getTime()) 
+                        ? startDate.toLocaleDateString('vi-VN') 
+                        : startDate.toLocaleDateString('vi-VN') + ' - ' + endDate.toLocaleDateString('vi-VN');
+                    
+                    let customDateText = document.getElementById('custom-date-text');
+                    if(customDateText) customDateText.innerText = text;
+                    
+                    window.customStartDate = startDate;
+                    window.customEndDate = endDate;
+                    window.filterAdminStats('custom', document.getElementById('btn-custom-date'));
+                }
+            }
+        });
+    }
 };
 
 window.submitAdminReply = async function() {
