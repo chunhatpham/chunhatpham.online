@@ -165,6 +165,7 @@ mongoose.connect(dbURI)
             
             // TÍNH NĂNG THÊM PHIM MỚI TỰ ĐỘNG (KHÔNG LÀM MẤT VIEW/LIKE CŨ)
             const newMoviesToAdd = [
+                ["Hoa Khôi Cứ Muốn Lấy Tôi", "https://i.postimg.cc/qqQrz8Gc/gen.jpg", "https://videotourl.com/audio/1779693162453-45b9feef-6cd4-4c56-87e4-f88ef6313c3a.mp3", "https://videotourl.com/audio/1779693257553-0cd7ae88-579f-43e5-a6f5-606a6ac31228.mp3", "https://videotourl.com/audio/1779693341982-c7edd88d-e8df-438b-b131-b61ab6777ba8.mp3"],
                 ["Tôi Cố Tình Tránh Né Em", "https://i.postimg.cc/2ymgM9D5/gen.jpg", "https://videotourl.com/audio/1779629664339-ce03196c-13ea-44e7-8c84-e9cbad435c61.mp3", "https://videotourl.com/audio/1779629726346-e397e660-47c2-47c7-960a-124122070567.mp3", "https://videotourl.com/audio/1779629816205-5c5a9854-e472-4710-a346-394684191ef5.mp3"],
                 ["Hai Cô Bạn Thay Lòng", "https://i.postimg.cc/0jsC9rcv/gen.jpg", "https://videotourl.com/audio/1779608774536-c77c114a-ab90-4d2e-8379-5e5982821f1a.mp3", "https://videotourl.com/audio/1779608811663-37ee6e00-a93b-4db9-bb66-41104ecb75b6.mp3", "https://videotourl.com/audio/1779608859692-34736359-da86-45eb-b1d3-0ac050b3300d.mp3"],
                 ["Linh Hồn Liên Kết Với Em", "https://i.postimg.cc/jjJNspCj/gen.jpg", "https://videotourl.com/audio/1779554838966-8f83f565-ae20-4a8e-8e21-22fc31c44dbe.mp3", "https://videotourl.com/audio/1779554926909-99c41724-c6f4-4507-b3d4-45cdfb1d6a97.mp3", "https://videotourl.com/audio/1779554975300-9a773fd1-67ff-4db9-aa09-bde99d665905.mp3"],
