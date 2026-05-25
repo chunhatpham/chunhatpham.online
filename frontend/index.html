@@ -16,6 +16,10 @@
     <link rel="icon" type="image/png" href="https://i.postimg.cc/BZTQdwdb/56575EA9-6C1E-453E-A0EE-628BF972D3E7.png?=V2">
     <link rel="shortcut icon" type="image/png" href="https://i.postimg.cc/BZTQdwdb/56575EA9-6C1E-453E-A0EE-628BF972D3E7.png?=V2">
     
+    <!-- Thư viện Lịch chọn ngày chuyên nghiệp (Flatpickr) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <link rel="stylesheet" href="style.css">
@@ -705,13 +709,9 @@
                     <button class="time-filter-btn" onclick="filterAdminStats('60days', this)">60 Ngày Qua</button>
                     <button class="time-filter-btn" onclick="filterAdminStats('1year', this)">1 Năm</button>
                     
-                    <div class="custom-date-filter" style="display: flex; align-items: center; gap: 10px; margin-left: auto; background: rgba(0,0,0,0.4); padding: 5px 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap;">
-                        <span style="color: #aaa; font-size: 13px;">Từ:</span>
-                        <input type="date" id="admin-date-start" class="auth-input" style="padding: 5px; margin: 0; min-width: 120px; font-size: 13px; background: transparent; border: none; box-shadow: none; border-bottom: 1px solid rgba(255,255,255,0.2); border-radius: 0;">
-                        <span style="color: #aaa; font-size: 13px;">Đến:</span>
-                        <input type="date" id="admin-date-end" class="auth-input" style="padding: 5px; margin: 0; min-width: 120px; font-size: 13px; background: transparent; border: none; box-shadow: none; border-bottom: 1px solid rgba(255,255,255,0.2); border-radius: 0;">
-                        <button class="btn-admin-action" style="background: #00e676; color: black; padding: 6px 15px;" onclick="filterAdminStats('custom', this)">Lọc Tùy Chỉnh</button>
-                    </div>
+                    <button class="time-filter-btn" id="btn-custom-date" style="background: rgba(0, 230, 118, 0.1); color: #00e676; border-color: #00e676; display: flex; align-items: center; gap: 8px;">
+                        <i class="far fa-calendar-alt"></i> <span id="custom-date-text">Tùy Chỉnh</span>
+                    </button>
                 </div>
 
                 <!-- THỐNG KÊ TỔNG QUAN -->
@@ -970,6 +970,9 @@
         </div>
     </div>
 
+    <!-- Kịch bản và ngôn ngữ Tiếng Việt cho Lịch -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
     <script src="script.js"></script>
 
     <script>

@@ -1418,6 +1418,33 @@ document.addEventListener('DOMContentLoaded', () => {
             if (installBanner) installBanner.style.display = 'none';
         }
     }, 50);
+
+    // KHỞI TẠO LỊCH FLAT PICKER (NÚT TÙY CHỈNH KHOẢNG THỜI GIAN)
+    if (typeof flatpickr !== 'undefined') {
+        flatpickr("#btn-custom-date", {
+            mode: "range",
+            locale: "vn",
+            dateFormat: "d/m/Y",
+            disableMobile: true, 
+            onClose: function(selectedDates) {
+                if (selectedDates.length > 0) {
+                    let startDate = selectedDates[0];
+                    let endDate = selectedDates.length > 1 ? selectedDates[1] : selectedDates[0];
+                    
+                    let text = (startDate.getTime() === endDate.getTime()) 
+                        ? startDate.toLocaleDateString('vi-VN') 
+                        : startDate.toLocaleDateString('vi-VN') + ' - ' + endDate.toLocaleDateString('vi-VN');
+                    
+                    let customDateText = document.getElementById('custom-date-text');
+                    if(customDateText) customDateText.innerText = text;
+                    
+                    window.customStartDate = startDate;
+                    window.customEndDate = endDate;
+                    window.filterAdminStats('custom', document.getElementById('btn-custom-date'));
+                }
+            }
+        });
+    }
 });
 
 // ================= BỔ SUNG CHỨC NĂNG =================
@@ -1879,32 +1906,6 @@ window.openAdminReplyModal = function(ticketId) {
             showNotification('error', 'Lỗi Mạng', 'Không kết nối được với máy chủ', 'Đóng');
         }
     }, 100);
-
-    if (typeof flatpickr !== 'undefined') {
-        flatpickr("#btn-custom-date", {
-            mode: "range",
-            locale: "vn",
-            dateFormat: "d/m/Y",
-            disableMobile: true, // Ép dùng giao diện lịch chuyên nghiệp của Flatpickr trên Mobile
-            onClose: function(selectedDates) {
-                if (selectedDates.length > 0) {
-                    let startDate = selectedDates[0];
-                    let endDate = selectedDates.length > 1 ? selectedDates[1] : selectedDates[0];
-                    
-                    let text = (startDate.getTime() === endDate.getTime()) 
-                        ? startDate.toLocaleDateString('vi-VN') 
-                        : startDate.toLocaleDateString('vi-VN') + ' - ' + endDate.toLocaleDateString('vi-VN');
-                    
-                    let customDateText = document.getElementById('custom-date-text');
-                    if(customDateText) customDateText.innerText = text;
-                    
-                    window.customStartDate = startDate;
-                    window.customEndDate = endDate;
-                    window.filterAdminStats('custom', document.getElementById('btn-custom-date'));
-                }
-            }
-        });
-    }
 };
 
 window.submitAdminReply = async function() {
