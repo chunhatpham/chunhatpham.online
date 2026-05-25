@@ -683,6 +683,30 @@ app.post('/api/user/buy-premium', async (req, res) => {
         const newTx = new Transaction({ referenceCode: 'PREM_' + Date.now(), contact: user.phone, amount: -price, content: `Mua gói Premium ${months} Tháng` });
         await newTx.save();
 
+        // Gửi email thông báo cho Admin
+        try {
+            const mailOptions = {
+                from: '"Hệ thống ChuNhatPham" <changdinhanh@gmail.com>',
+                to: 'changdinhanh@gmail.com', // Email của Admin
+                subject: `[PREMIUM MỚI] Tài khoản ${user.username} vừa đăng ký Premium`,
+                html: `
+                    <div style="font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; border-radius: 10px;">
+                        <h2 style="color: #f5c518; background: #111; padding: 10px; border-radius: 8px; text-align: center;">🎉 CÓ ĐƠN ĐĂNG KÝ PREMIUM MỚI!</h2>
+                        <p><strong>Tên tài khoản:</strong> ${user.username}</p>
+                        <p><strong>Số điện thoại:</strong> ${user.phone || 'Không có'}</p>
+                        <p><strong>Email đăng ký:</strong> ${user.email || 'Không có'}</p>
+                        <p><strong>Gói Premium:</strong> Huy hiệu ${tier.toUpperCase()} (${months} Tháng)</p>
+                        <p><strong>Số tiền thanh toán:</strong> <span style="color: #ff4e00; font-weight: bold;">${price.toLocaleString('vi-VN')} VNĐ</span></p>
+                        <p><strong>Thời gian đăng ký:</strong> ${new Date().toLocaleString('vi-VN')}</p>
+                        <p><strong>Thời gian hết hạn:</strong> ${new Date(user.premiumExpiry).toLocaleString('vi-VN')}</p>
+                    </div>
+                `
+            };
+            await transporter.sendMail(mailOptions);
+        } catch (mailErr) {
+            console.log("🟡 Lỗi gửi Email báo Admin mua Premium:", mailErr.message);
+        }
+
         res.status(200).json({ message: "Nâng cấp Premium thành công!", user: { walletBalance: user.walletBalance, isPremium: user.isPremium, premiumTier: user.premiumTier, premiumExpiry: user.premiumExpiry } });
     } catch (error) { res.status(500).json({ message: "Lỗi hệ thống khi thanh toán!" }); }
 });
@@ -748,6 +772,31 @@ app.post('/api/admin/add-balance', async (req, res) => {
 
         res.status(200).json({ success: true, message: `Đã cộng ${addAmt.toLocaleString('vi-VN')}đ cho ${user.username}`, newBalance: user.walletBalance });
     } catch (error) { console.error("Lỗi nạp tiền thủ công:", error); res.status(500).json({ message: "Lỗi hệ thống: " + (error.message || error) }); }
+});
+
+// API TRỪ TIỀN THỦ CÔNG
+app.post('/api/admin/deduct-balance', async (req, res) => {
+    try {
+        const { targetUsername, amount, reason } = req.body;
+        const user = await User.findOne({ username: targetUsername });
+        
+        if (!user) return res.status(404).json({ message: "Không tìm thấy người dùng này!" });
+        
+        const deductAmt = Number(amount);
+        if (isNaN(deductAmt) || deductAmt <= 0) return res.status(400).json({ message: "Số tiền không hợp lệ!" });
+
+        if (user.walletBalance < deductAmt) {
+            return res.status(400).json({ message: `Số dư của ${user.username} (${user.walletBalance.toLocaleString('vi-VN')}đ) không đủ để trừ ${deductAmt.toLocaleString('vi-VN')}đ!` });
+        }
+
+        user.walletBalance -= deductAmt;
+        await user.save();
+
+        const newTx = new Transaction({ referenceCode: 'DEDUCT_' + Date.now() + '_' + Math.floor(Math.random() * 10000), contact: user.phone || user.username, amount: -deductAmt, content: reason || 'Admin trừ tiền thủ công' });
+        await newTx.save();
+
+        res.status(200).json({ success: true, message: `Đã trừ ${deductAmt.toLocaleString('vi-VN')}đ của ${user.username}`, newBalance: user.walletBalance });
+    } catch (error) { console.error("Lỗi trừ tiền thủ công:", error); res.status(500).json({ message: "Lỗi hệ thống: " + (error.message || error) }); }
 });
 
 // API XÓA TÀI KHOẢN

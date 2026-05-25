@@ -704,6 +704,14 @@
                     <button class="time-filter-btn" onclick="filterAdminStats('30days', this)">30 Ngày Qua</button>
                     <button class="time-filter-btn" onclick="filterAdminStats('60days', this)">60 Ngày Qua</button>
                     <button class="time-filter-btn" onclick="filterAdminStats('1year', this)">1 Năm</button>
+                    
+                    <div class="custom-date-filter" style="display: flex; align-items: center; gap: 10px; margin-left: auto; background: rgba(0,0,0,0.4); padding: 5px 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap;">
+                        <span style="color: #aaa; font-size: 13px;">Từ:</span>
+                        <input type="date" id="admin-date-start" class="auth-input" style="padding: 5px; margin: 0; min-width: 120px; font-size: 13px; background: transparent; border: none; box-shadow: none; border-bottom: 1px solid rgba(255,255,255,0.2); border-radius: 0;">
+                        <span style="color: #aaa; font-size: 13px;">Đến:</span>
+                        <input type="date" id="admin-date-end" class="auth-input" style="padding: 5px; margin: 0; min-width: 120px; font-size: 13px; background: transparent; border: none; box-shadow: none; border-bottom: 1px solid rgba(255,255,255,0.2); border-radius: 0;">
+                        <button class="btn-admin-action" style="background: #00e676; color: black; padding: 6px 15px;" onclick="filterAdminStats('custom', this)">Lọc Tùy Chỉnh</button>
+                    </div>
                 </div>
 
                 <!-- THỐNG KÊ TỔNG QUAN -->
@@ -816,6 +824,25 @@
             </div>
         </div>
         
+        <!-- MODAL TRỪ TIỀN THỦ CÔNG CHO ADMIN -->
+        <div class="global-modal-overlay" id="admin-deduct-balance-modal">
+            <div class="global-modal-box">
+                <button class="modal-close-icon" onclick="document.getElementById('admin-deduct-balance-modal').classList.remove('show')"><i class="fas fa-times"></i></button>
+                <div class="modal-header"><i class="fas fa-hand-holding-usd" style="color:#ff4e00"></i><h2 style="color: white;">Trừ Tiền Tài Khoản</h2></div>
+                <div class="modal-body">
+                    <p style="text-align: left; margin-bottom: 5px;">Trừ tiền tài khoản:</p>
+                    <input type="text" id="admin-target-user-deduct" class="auth-input" readonly style="color: #ff4e00; font-weight: bold; background: rgba(0,0,0,0.5);">
+                    <p style="text-align: left; margin-bottom: 5px; margin-top: 15px;">Nhập số tiền muốn trừ (-):</p>
+                    <input type="text" id="admin-deduct-amount" class="auth-input" placeholder="VD: 50000, 50k, 50.000">
+                    <p style="text-align: left; margin-bottom: 5px; margin-top: 15px;">Lý do (Tùy chọn):</p>
+                    <input type="text" id="admin-deduct-reason" class="auth-input" placeholder="VD: Vi phạm quy định...">
+                </div>
+                <div class="modal-footer">
+                    <button class="auth-btn" style="background: linear-gradient(45deg, #ff4e00, #e50914);" onclick="submitManualDeduct()">Xác Nhận Trừ</button>
+                </div>
+            </div>
+        </div>
+
         <!-- MODAL CHỈNH SỬA TÀI KHOẢN (ADMIN) -->
         <div class="global-modal-overlay" id="admin-edit-user-modal">
             <div class="global-modal-box" style="width: 450px;">

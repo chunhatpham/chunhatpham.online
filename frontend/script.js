@@ -1552,24 +1552,48 @@ window.loadAdminData = async function() {
 
 window.filterAdminStats = function(period, btn) {
     document.querySelectorAll('.time-filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+    if (btn && btn.classList.contains('time-filter-btn')) btn.classList.add('active');
 
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     let startDate;
+    let endDate;
 
-    if (period === 'today') startDate = today;
-    else if (period === 'yesterday') startDate = new Date(today.getTime() - 24 * 60 * 60 * 1000);
-    else if (period === '7days') startDate = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000);
-    else if (period === '30days') startDate = new Date(today.getTime() - 29 * 24 * 60 * 60 * 1000);
-    else if (period === '60days') startDate = new Date(today.getTime() - 59 * 24 * 60 * 60 * 1000);
-    else if (period === '1year') startDate = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
+    if (period === 'custom') {
+        const startVal = document.getElementById('admin-date-start').value;
+        const endVal = document.getElementById('admin-date-end').value;
+        if (!startVal || !endVal) {
+            showNotification('warning', 'Thiếu Thông Tin', 'Vui lòng chọn đầy đủ Ngày Bắt Đầu và Ngày Kết Thúc.', 'Đã hiểu');
+            return;
+        }
+        startDate = new Date(startVal);
+        startDate.setHours(0, 0, 0, 0);
+        endDate = new Date(endVal);
+        endDate.setHours(23, 59, 59, 999);
+        
+        if (startDate > endDate) {
+            showNotification('warning', 'Lỗi', 'Ngày Bắt Đầu không thể lớn hơn Ngày Kết Thúc.', 'Đã hiểu');
+            return;
+        }
+    } else {
+        if (period === 'today') startDate = today;
+        else if (period === 'yesterday') startDate = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+        else if (period === '7days') startDate = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000);
+        else if (period === '30days') startDate = new Date(today.getTime() - 29 * 24 * 60 * 60 * 1000);
+        else if (period === '60days') startDate = new Date(today.getTime() - 59 * 24 * 60 * 60 * 1000);
+        else if (period === '1year') startDate = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
 
-    const endDate = (period === 'yesterday') ? today : new Date(now.getTime() + 1000); // +1s để bao gồm cả ngày hôm nay
+        endDate = (period === 'yesterday') ? new Date(today.getTime() - 1) : new Date(now.getTime() + 1000);
+        
+        let dStart = document.getElementById('admin-date-start');
+        let dEnd = document.getElementById('admin-date-end');
+        if (dStart) dStart.value = '';
+        if (dEnd) dEnd.value = '';
+    }
 
-    const filteredUsers = window.adminFullData.users.filter(u => new Date(u.createdAt) >= startDate && new Date(u.createdAt) < endDate);
-    const filteredTxs = window.adminFullData.transactions.filter(t => new Date(t.createdAt) >= startDate && new Date(t.createdAt) < endDate);
-    const filteredTickets = window.adminFullData.tickets.filter(t => new Date(t.createdAt) >= startDate && new Date(t.createdAt) < endDate);
+    const filteredUsers = window.adminFullData.users.filter(u => new Date(u.createdAt) >= startDate && new Date(u.createdAt) <= endDate);
+    const filteredTxs = window.adminFullData.transactions.filter(t => new Date(t.createdAt) >= startDate && new Date(t.createdAt) <= endDate);
+    const filteredTickets = window.adminFullData.tickets.filter(t => new Date(t.createdAt) >= startDate && new Date(t.createdAt) <= endDate);
 
     document.getElementById('stat-total-users').innerText = filteredUsers.length.toLocaleString('vi-VN');
     const totalRevenue = filteredTxs.filter(t => t.status === 'success' && t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
@@ -1587,6 +1611,7 @@ window.renderAdminUsers = function(usersArray) {
             let createdDate = new Date(u.createdAt).toLocaleDateString('vi-VN');
             uHtml += `<tr><td style="font-weight:bold; color: white; font-size: 16px;">${u.username}<br><span style="font-size:11px; color:#888; font-weight:normal;">Tạo: ${createdDate}</span></td><td><i class="fas fa-phone" style="font-size:11px; color:#aaa;"></i> ${u.phone}<br><i class="fas fa-envelope" style="font-size:11px; color:#aaa;"></i> <span style="font-size:13px; color:#ccc;">${u.email}</span></td><td style="color:#00e676; font-weight:bold; font-size: 16px;">${u.walletBalance.toLocaleString('vi-VN')}đ</td><td>${vipStatus}</td><td style="display: flex; gap: 8px;">
                 <button class="btn-admin-action" onclick="openManualAddModal('${u.username}')" title="Cộng tiền"><i class="fas fa-plus"></i></button>
+                <button class="btn-admin-action" style="background: #ff9800; color: white;" onclick="openManualDeductModal('${u.username}')" title="Trừ tiền"><i class="fas fa-minus"></i></button>
                 <button class="btn-admin-action" style="background: #00c6ff;" onclick="openEditUserModal('${u.username}', ${u.walletBalance}, ${u.isPremium}, '${u.premiumTier}')" title="Sửa"><i class="fas fa-pen"></i></button>
                 <button class="btn-admin-action" style="background: #e50914; color: white;" onclick="deleteUser('${u.username}')" title="Xóa"><i class="fas fa-trash"></i></button>
             </td></tr>`;
@@ -1636,6 +1661,30 @@ window.submitManualBalance = async function() {
             let res = await fetch('https://chunhatpham-online.onrender.com/api/admin/add-balance', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUsername: un, amount: amt }) });
             let data = await res.json();
             if(res.ok) { showNotification('success', 'Thành Công', data.message, 'Đóng'); document.getElementById('admin-add-balance-modal').classList.remove('show'); loadAdminData(); }
+            else { showNotification('error', 'Lỗi', data.message, 'Đóng'); }
+        } catch(e) { showNotification('error', 'Lỗi Mạng', 'Không gọi được API', 'Đóng'); }
+    });
+};
+
+window.openManualDeductModal = function(username) {
+    document.getElementById('admin-target-user-deduct').value = username;
+    document.getElementById('admin-deduct-amount').value = '';
+    document.getElementById('admin-deduct-reason').value = '';
+    document.getElementById('admin-deduct-balance-modal').classList.add('show');
+};
+
+window.submitManualDeduct = async function() {
+    let un = document.getElementById('admin-target-user-deduct').value; 
+    let rawAmt = document.getElementById('admin-deduct-amount').value;
+    let reason = document.getElementById('admin-deduct-reason').value.trim();
+    
+    let amt = parseInt(rawAmt.toLowerCase().replace(/k/g, '000').replace(/[,.]/g, '').trim());
+    if(!amt || amt <= 0 || isNaN(amt)) { showNotification('warning', 'Lỗi', 'Vui lòng nhập số tiền hợp lệ (VD: 50000, 50k)', 'OK'); return; }
+    window.executeWithLoading(async () => {
+        try {
+            let res = await fetch('https://chunhatpham-online.onrender.com/api/admin/deduct-balance', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetUsername: un, amount: amt, reason: reason }) });
+            let data = await res.json();
+            if(res.ok) { showNotification('success', 'Thành Công', data.message, 'Đóng'); document.getElementById('admin-deduct-balance-modal').classList.remove('show'); loadAdminData(); }
             else { showNotification('error', 'Lỗi', data.message, 'Đóng'); }
         } catch(e) { showNotification('error', 'Lỗi Mạng', 'Không gọi được API', 'Đóng'); }
     });
