@@ -165,6 +165,7 @@ mongoose.connect(dbURI)
             
             // TÍNH NĂNG THÊM PHIM MỚI TỰ ĐỘNG (KHÔNG LÀM MẤT VIEW/LIKE CŨ)
             const newMoviesToAdd = [
+                ["Tôi Thích Bạn Thân Nhỏ", "https://i.postimg.cc/wvtfkZP7/gen.jpg", "https://videotourl.com/audio/1779905458718-f07471fa-57d6-442a-b04a-42be94a30a08.mp3", "https://videotourl.com/audio/1779905555063-cc2d4f1f-0d97-4d54-bbbc-75cde9d9f9c8.mp3", "https://videotourl.com/audio/1779905754963-c29edf9e-2e2b-4d37-89b9-c1f46cad9976.mp3"],
                 ["Tôi Được Tặng Ngôi Sao", "https://i.postimg.cc/DZWjcHDm/gen.jpg", "https://videotourl.com/audio/1779904438090-dfc6c777-e207-4a5d-999b-0f38eabb7547.mp3", "https://videotourl.com/audio/1779904482466-37476e66-0c65-4f65-ac39-975196222489.mp3", "https://videotourl.com/audio/1779904530466-23d81856-8363-4ccc-ab59-6138bb43f98c.mp3"],
                 ["Đơn Đăng Kí Kết Hôn Của Em", "https://i.postimg.cc/tTnNKFX4/gen.jpg", "https://videotourl.com/audio/1779815498035-84f87369-e3f2-4901-8159-72a7d242a3a9.mp3", "https://videotourl.com/audio/1779815567104-5ad95ce1-e081-4d25-b247-972c7734a649.mp3", "https://videotourl.com/audio/1779815608334-c7bf44fd-3ca3-4f31-bbac-1c2094111774.mp3"],
                 ["Vợ Và Anh Em Biến Mất", "https://i.postimg.cc/yYcxy0gJ/0CEFAAD6-0BB4-4CAD-9E0A-16C12E021986.jpg", "https://videotourl.com/audio/1779776481106-d976ceb2-f2be-4697-a06d-c80504cecf71.mp3", "https://videotourl.com/audio/1779776566579-d62338e5-c7d3-480a-9eec-12dfde64328b.mp3", "https://videotourl.com/audio/1779776609860-835b44f2-5103-4df9-b445-6afcd222b326.mp3"],
