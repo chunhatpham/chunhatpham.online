@@ -165,6 +165,7 @@ mongoose.connect(dbURI)
             
             // TÍNH NĂNG THÊM PHIM MỚI TỰ ĐỘNG (KHÔNG LÀM MẤT VIEW/LIKE CŨ)
             const newMoviesToAdd = [
+                ["Bối Rối Trong Tình Yêu", "https://i.postimg.cc/CMfzdBpZ/gen.jpg", "https://videotourl.com/audio/1780022496545-12b4bf12-e878-42ba-bc6c-790a27eda055.mp3", "https://videotourl.com/audio/1780022536071-ab5bbcef-1814-4197-8c3a-cb5d7a6e5f4c.mp3", "https://videotourl.com/audio/1780022600340-bce72736-24f3-4de2-a45e-1b9a7291e001.mp3"],
                 ["Thích Đôi Chân Nhỏ Hoa Khôi", "https://i.postimg.cc/RZRCbQ4J/gen.jpg", "https://videotourl.com/audio/1779958165709-c158deae-c736-4846-afd5-c632178392ee.mp3", "https://videotourl.com/audio/1779958209411-3ea49798-2635-4a2b-bff6-80431adae21e.mp3", "https://videotourl.com/audio/1779958244438-c2f6d6f0-1f7a-4d0f-851e-601af500ffa3.mp3"],
                 ["Tôi Thích Bạn Thân Nhỏ", "https://i.postimg.cc/wvtfkZP7/gen.jpg", "https://videotourl.com/audio/1779905458718-f07471fa-57d6-442a-b04a-42be94a30a08.mp3", "https://videotourl.com/audio/1779905555063-cc2d4f1f-0d97-4d54-bbbc-75cde9d9f9c8.mp3", "https://videotourl.com/audio/1779905754963-c29edf9e-2e2b-4d37-89b9-c1f46cad9976.mp3"],
                 ["Tôi Được Tặng Ngôi Sao", "https://i.postimg.cc/DZWjcHDm/gen.jpg", "https://videotourl.com/audio/1779904438090-dfc6c777-e207-4a5d-999b-0f38eabb7547.mp3", "https://videotourl.com/audio/1779904482466-37476e66-0c65-4f65-ac39-975196222489.mp3", "https://videotourl.com/audio/1779904530466-23d81856-8363-4ccc-ab59-6138bb43f98c.mp3"],
