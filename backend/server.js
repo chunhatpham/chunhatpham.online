@@ -165,6 +165,7 @@ mongoose.connect(dbURI)
             
             // TÍNH NĂNG THÊM PHIM MỚI TỰ ĐỘNG (KHÔNG LÀM MẤT VIEW/LIKE CŨ)
             const newMoviesToAdd = [
+                ["Tôi Không Còn Được Yêu", "https://i.postimg.cc/50CF45V1/6B1DFB9F-3FE8-4C2A-B426-481DB086C118.jpg", "https://files.catbox.moe/z8gy18.MP3", "https://files.catbox.moe/wlhvts.MP3", "https://files.catbox.moe/qd7lev.MP3"],
                 ["Tôi Bảo Vệ Cô Bé Hàng Xóm", "https://i.postimg.cc/RZRhYRHD/gen.jpg", "https://files.catbox.moe/5dktoe.MP3", "https://files.catbox.moe/5defjx.MP3", "https://files.catbox.moe/oy7nyy.MP3", "https://files.catbox.moe/1mm2no.MP3", "https://files.catbox.moe/qr8fav.MP3"],
                 ["Ông Sắp Đặt Giúp Tôi Hôn Ước", "https://i.postimg.cc/T1MYjvXw/gen.jpg", "https://files.catbox.moe/0m6q6h.MP3", "https://files.catbox.moe/7uj3gj.MP3", "https://files.catbox.moe/4lozhl.MP3"],
                 ["Tôi Thay Đổi Quyết Định Lần Này", "https://i.postimg.cc/8PKQFTy2/gen.jpg", "https://videotourl.com/audio/1780125848770-b5094d4b-4006-494b-a597-277475b202e7.mp3", "https://videotourl.com/audio/1780125886453-a2e6411e-0efc-4200-ac6e-1b7a4117225c.mp3", "https://videotourl.com/audio/1780125921642-5b0a2b38-45f7-408a-a89c-fa8cc252fcf6.mp3"],
