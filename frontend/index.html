@@ -34,8 +34,16 @@
         </div>
     </div>
 
-    <div id="top-welcome-toast" class="top-welcome-toast">
-        <i class="fas fa-headphones-alt"></i> Chào mừng bạn đến với chunhatpham audio, chúc bạn xem phim vui vẻ!
+    <!-- THÔNG BÁO CHÀO MỪNG MỚI CHÍNH GIỮA MÀN HÌNH -->
+    <div class="welcome-modal-overlay" id="welcome-modal-overlay">
+        <div class="welcome-modal-box">
+            <div class="welcome-logo-container">
+                <img src="https://i.postimg.cc/BZTQdwdb/56575EA9-6C1E-453E-A0EE-628BF972D3E7.png" alt="ChuNhatPham Logo" class="welcome-logo">
+            </div>
+            <h2 class="welcome-title">Chào mừng bạn!</h2>
+            <p class="welcome-message">chào mừng bạn đến với web chunhatpham audio của tôi chúc bạn xem phim vui vẻ ạ !!!</p>
+            <button class="welcome-btn" onclick="closeWelcomeModal()">Bắt Đầu</button>
+        </div>
     </div>
 
     <!-- TRÌNH PHÁT ÂM THANH TOÀN CỤC (DƯỚI ĐÁY MÀN HÌNH) -->
@@ -275,7 +283,7 @@
                     <div class="intro-avatar"><i class="fas fa-crown"></i></div>
                     <div class="intro-content">
                         <h2 class="intro-title">Vài Lời Ngỏ Từ <span class="highlight-primary">Admin</span></h2>
-                        <p>Chào mừng bạn đến với thiên đường giải trí <strong>chunhatpham.online</strong> – nền tảng chuyên cung cấp <span class="highlight-white">phim truyện hoạt hình & truyện tranh Audio Vietsub Trung Quốc</span> hàng đầu! Tại đây, chúng tôi mang đến một thế giới cảm xúc đa dạng: từ những bộ <span class="highlight-gold">ngôn tình ngọt ngào</span>, <span class="highlight-blue">ngược tâm đau khổ</span>, cho đến những câu chuyện tình cảm sâu sắc, dằn vặt hay nhất...</p>
+                        <p>Chào mừng bạn đến với thiên đường giải trí <strong>chunhatpham.fun</strong> – nền tảng chuyên cung cấp <span class="highlight-white">phim truyện hoạt hình & truyện tranh Audio Vietsub Trung Quốc</span> hàng đầu! Tại đây, chúng tôi mang đến một thế giới cảm xúc đa dạng: từ những bộ <span class="highlight-gold">ngôn tình ngọt ngào</span>, <span class="highlight-blue">ngược tâm đau khổ</span>, cho đến những câu chuyện tình cảm sâu sắc, dằn vặt hay nhất...</p>
                         <p>Những danh sách phim bạn vừa lướt qua phía trên chính là các siêu phẩm <strong>được cộng đồng xem nhiều nhất và yêu thích nhất</strong>. Web tự hào sở hữu <span class="highlight-white">kho tàng khổng lồ chứa hầu hết tất cả các tác phẩm thuộc dòng phim ảnh & audio Trung Quốc</span>. Bạn chỉ cần gõ tên vào thanh tìm kiếm là sẽ ra ngay! Đặc biệt, mọi bộ truyện trên web đều được cập nhật <strong>FULL định dạng từ Audio đến Video sắc nét</strong>.</p>
                         <p>Tôi là <span class="admin-name">chunhatpham</span> — vừa là Admin, vừa là người bạn đồng hành cùng bạn trên hành trình săn lùng những bộ phim mới và hay nhất. Chúng tôi luôn nỗ lực cập nhật từng giờ để mang lại sự thoải mái tuyệt đối cho khán giả. Nếu bạn có bất kỳ thắc mắc nào, hoặc muốn <span class="highlight-gold">đề xuất làm thêm bộ phim mới</span>, đừng ngần ngại <a href="#" onclick="openTab('tab-contact')" class="contact-link">liên hệ cho Ad</a> để được hỗ trợ nhiệt tình nhé!</p>
                         <p class="intro-closing">
@@ -306,7 +314,7 @@
             <footer class="main-footer">
                 <div class="footer-grid">
                     <div class="footer-about">
-                        <h4>chunhatpham.online</h4>
+                        <h4>chunhatpham.fun</h4>
                         <p>Xem Phim ChuNhatpHam chất lượng cao, hỗ trợ phụ đề tiếng Việt, thuyết minh và lồng tiếng. Kho phim đa dạng với hơn <strong>10.000+ tựa phim</strong>, liên tục cập nhật các thể loại Hot và Mới Nhất.</p>
                         <p>Website có giao diện thân thiện và trực quan, dễ sử dụng, tốc độ tải nhanh. Luôn cập nhật phim mới mỗi ngày, mang đến trải nghiệm giải trí tuyệt vời cho mọi người yêu phim.</p>
                     </div>
@@ -329,7 +337,7 @@
                         </ul>
                     </div>
                 </div>
-                <div class="footer-bottom-line">© 2026 ChuNhatpHam.online - Nền Tảng Xem Phim Đỉnh Cao. All rights reserved.</div>
+                <div class="footer-bottom-line">© 2026 ChuNhatpHam.fun - Nền Tảng Xem Phim Đỉnh Cao. All rights reserved.</div>
             </footer>
         </section>
 
@@ -404,7 +412,7 @@
             </div>
             
             <footer class="main-footer" style="position: relative; z-index: 10; margin-top: 0; background: transparent; border: none;">
-                <div class="footer-bottom-line">© 2026 ChuNhatpHam.online. All rights reserved.</div>
+                <div class="footer-bottom-line">© 2026 ChuNhatpHam.fun. All rights reserved.</div>
             </footer>
         </section>
 
@@ -433,7 +441,7 @@
                     </div>
             </div>
             <footer class="main-footer">
-                <div class="footer-bottom-line">© 2026 ChuNhatpHam.online. All rights reserved.</div>
+                <div class="footer-bottom-line">© 2026 ChuNhatpHam.fun. All rights reserved.</div>
             </footer>
         </section>
 
@@ -452,7 +460,7 @@
                 </div>
             </div>
             <footer class="main-footer">
-                <div class="footer-bottom-line">© 2026 ChuNhatpHam.online. All rights reserved.</div>
+                <div class="footer-bottom-line">© 2026 ChuNhatpHam.fun. All rights reserved.</div>
             </footer>
         </section>
 
@@ -478,13 +486,13 @@
                         <h3 class="event-title"><i class="fas fa-gift"></i> SỰ KIỆN NẠP THẺ KHỦNG</h3>
                         <p class="event-desc">Tham gia ngay chuỗi sự kiện đặc biệt! Nạp mốc càng cao, tỷ lệ khuyến mãi càng lớn!</p>
                         <div class="event-image-wrapper">
-                            <img src="https://i.postimg.cc/GtwzYLWX/B0624652-3225-4FFE-824C-2FBCDBA5CECE.png" alt="Sự kiện nạp tiền">
+                            <img src="https://i.postimg.cc/TwJ55dpN/0E3B1556-1253-4DF0-B3E5-DFFD8F3F0241.png" alt="Sự kiện nạp tiền">
                         </div>
                     </div>
                 </div>
             </div>
             <footer class="main-footer">
-                <div class="footer-bottom-line">© 2026 ChuNhatpHam.online. All rights reserved.</div>
+                <div class="footer-bottom-line">© 2026 ChuNhatpHam.fun. All rights reserved.</div>
             </footer>
         </section>
 
@@ -637,7 +645,7 @@
                 </div>
             </div>
             <footer class="main-footer">
-                <div class="footer-bottom-line">© 2026 ChuNhatpHam.online. All rights reserved.</div>
+                <div class="footer-bottom-line">© 2026 ChuNhatpHam.fun. All rights reserved.</div>
             </footer>
         </section>
 
@@ -673,7 +681,7 @@
                     <div class="contact-right-col wiki-section">
                         <div class="wiki-card wiki-red">
                             <div class="wiki-header"><i class="fas fa-bell"></i><h3>Thông Báo Mới Nhất</h3></div>
-                            <p>Chào mừng đến với phiên bản nâng cấp của ChuNhatPham.online.</p>
+                            <p>Chào mừng đến với phiên bản nâng cấp của ChuNhatPham.fun.</p>
                         </div>
                         <div class="wiki-card wiki-blue">
                             <div class="wiki-header"><i class="fas fa-film"></i><h3>Kho Phim & Sản Phẩm</h3></div>
@@ -691,7 +699,7 @@
                 </div>
             </div>
             <footer class="main-footer">
-                <div class="footer-bottom-line">© 2026 ChuNhatpHam.online. All rights reserved.</div>
+                <div class="footer-bottom-line">© 2026 ChuNhatpHam.fun. All rights reserved.</div>
             </footer>
         </section>
 

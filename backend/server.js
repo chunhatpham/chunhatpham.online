@@ -67,11 +67,11 @@ mongoose.connect(dbURI)
                 const hashedAdminPassword = await bcrypt.hash('Admin@123456', salt); // Mật khẩu mặc định
                 
                 // Xóa các tài khoản rác (nếu có) đang chiếm dụng số điện thoại hoặc email của Admin
-                await User.deleteMany({ $or: [{ phone: '0999999999' }, { email: 'admin_master@chunhatpham.online' }] });
+                await User.deleteMany({ $or: [{ phone: '0999999999' }, { email: 'admin_master@chunhatpham.fun' }] });
 
                 adminUser = new User({
                     phone: '0999999999',
-                    email: 'admin_master@chunhatpham.online',
+                    email: 'admin_master@chunhatpham.fun',
                     username: 'chunhatpham_admin',
                     password: hashedAdminPassword,
                     walletBalance: 99999999, role: 'admin', isPremium: true, premiumTier: 'diamond'

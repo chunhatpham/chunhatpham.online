@@ -1384,13 +1384,20 @@ window.submitSupportTicket = async function() {
     });
 };
 
+// HÀM ĐÓNG THÔNG BÁO CHÀO MỪNG
+window.closeWelcomeModal = function() {
+    const welcomeOverlay = document.getElementById('welcome-modal-overlay');
+    if (welcomeOverlay) {
+        welcomeOverlay.classList.remove('show');
+    }
+};
+
 // ================= KHỞI CHẠY TẤT CẢ KHI LOAD WEB XONG =================
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
-        let topToast = document.getElementById('top-welcome-toast');
-        if(topToast) {
-            topToast.classList.add('show');
-            setTimeout(() => { topToast.classList.remove('show'); }, 4000);
+        let welcomeOverlay = document.getElementById('welcome-modal-overlay');
+        if(welcomeOverlay) {
+            welcomeOverlay.classList.add('show');
         }
     }, 1000);
 
