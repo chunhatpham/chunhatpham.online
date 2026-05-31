@@ -165,6 +165,7 @@ mongoose.connect(dbURI)
             
             // TÍNH NĂNG THÊM PHIM MỚI TỰ ĐỘNG (KHÔNG LÀM MẤT VIEW/LIKE CŨ)
             const newMoviesToAdd = [
+                ["Tôi Bảo Vệ Cô Bé Hàng Xóm", "https://i.postimg.cc/RZRhYRHD/gen.jpg", "https://files.catbox.moe/5dktoe.MP3", "https://files.catbox.moe/5defjx.MP3", "https://files.catbox.moe/oy7nyy.MP3", "https://files.catbox.moe/1mm2no.MP3", "https://files.catbox.moe/qr8fav.MP3"],
                 ["Ông Sắp Đặt Giúp Tôi Hôn Ước", "https://i.postimg.cc/T1MYjvXw/gen.jpg", "https://files.catbox.moe/0m6q6h.MP3", "https://files.catbox.moe/7uj3gj.MP3", "https://files.catbox.moe/4lozhl.MP3"],
                 ["Tôi Thay Đổi Quyết Định Lần Này", "https://i.postimg.cc/8PKQFTy2/gen.jpg", "https://videotourl.com/audio/1780125848770-b5094d4b-4006-494b-a597-277475b202e7.mp3", "https://videotourl.com/audio/1780125886453-a2e6411e-0efc-4200-ac6e-1b7a4117225c.mp3", "https://videotourl.com/audio/1780125921642-5b0a2b38-45f7-408a-a89c-fa8cc252fcf6.mp3"],
                 ["Bạn Gái Nghe Thấy Tiếng Lòng", "https://i.postimg.cc/Jnvp6t17/gen.jpg", "https://videotourl.com/audio/1780063256765-8804b656-2f82-423f-ae1b-4e34e565c301.mp3", "https://videotourl.com/audio/1780063309663-0fc9ebb3-aac8-4243-8488-25e9b725a2e4.mp3", "https://videotourl.com/audio/1780063363617-1823e020-e668-46b3-9fae-c2db4aa85591.mp3", "https://videotourl.com/audio/1780063406694-125c3538-36a6-4d03-9e76-be81bc444268.mp3"],
