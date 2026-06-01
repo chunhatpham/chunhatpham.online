@@ -165,6 +165,7 @@ mongoose.connect(dbURI)
             
             // TÍNH NĂNG THÊM PHIM MỚI TỰ ĐỘNG (KHÔNG LÀM MẤT VIEW/LIKE CŨ)
             const newMoviesToAdd = [
+                ["Bạn Gái Cũ Suy Tình Của Tôi", "https://i.postimg.cc/dVbvcdnX/gen.jpg", "https://files.catbox.moe/w2tc3a.MP3", "https://files.catbox.moe/eyttkq.MP3", "https://files.catbox.moe/tiuln0.MP3"],
                 ["Không Còn Yêu Nhau Nữa", "https://i.postimg.cc/pdcxFjPN/gen.jpg", "https://files.catbox.moe/qz6yhl.MP3", "https://files.catbox.moe/krhg1o.MP3", "https://files.catbox.moe/191ajm.MP3"],
                 ["Tôi Không Còn Được Yêu", "https://i.postimg.cc/50CF45V1/6B1DFB9F-3FE8-4C2A-B426-481DB086C118.jpg", "https://files.catbox.moe/z8gy18.MP3", "https://files.catbox.moe/wlhvts.MP3", "https://files.catbox.moe/qd7lev.MP3"],
                 ["Tôi Bảo Vệ Cô Bé Hàng Xóm", "https://i.postimg.cc/RZRhYRHD/gen.jpg", "https://files.catbox.moe/5dktoe.MP3", "https://files.catbox.moe/5defjx.MP3", "https://files.catbox.moe/oy7nyy.MP3", "https://files.catbox.moe/1mm2no.MP3", "https://files.catbox.moe/qr8fav.MP3"],
