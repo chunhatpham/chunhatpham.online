@@ -165,6 +165,7 @@ mongoose.connect(dbURI)
             
             // TÍNH NĂNG THÊM PHIM MỚI TỰ ĐỘNG (KHÔNG LÀM MẤT VIEW/LIKE CŨ)
             const newMoviesToAdd = [
+                ["Tôi Rời Đi Chỉ Vì Bức Ảnh", "https://i.postimg.cc/SRvwcFHL/gen.jpg", "https://files.catbox.moe/uz1ihg.MP3", "https://files.catbox.moe/ilhpqr.MP3", "https://files.catbox.moe/u6nuiq.MP3"],
                 ["Chế Tạo Thành Công Cỗ Máy", "https://i.postimg.cc/g0YCH2BP/gen.jpg", "https://files.catbox.moe/k50oui.MP3", "https://files.catbox.moe/mnkz7t.MP3", "https://files.catbox.moe/etytx1.MP3"],
                 ["Bỗng Dưng Bị Bắt Trong Nhà", "https://i.postimg.cc/26qBcv0K/gen.jpg", "https://files.catbox.moe/r9xj0g.MP3", "https://files.catbox.moe/vckm9y.MP3", "https://files.catbox.moe/ghofzo.MP3", "https://files.catbox.moe/gj0zb6.MP3", "https://files.catbox.moe/ipl1dx.MP3"],
                 ["Mang Lại Sự Sống Cho Bạn Gái", "https://i.postimg.cc/TwGKPbdW/gen.jpg", "https://files.catbox.moe/0gosc1.MP3", "https://files.catbox.moe/xhag97.MP3", "https://files.catbox.moe/0r1ucx.MP3"],
