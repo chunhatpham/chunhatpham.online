@@ -165,6 +165,7 @@ mongoose.connect(dbURI)
             
             // TÍNH NĂNG THÊM PHIM MỚI TỰ ĐỘNG (KHÔNG LÀM MẤT VIEW/LIKE CŨ)
             const newMoviesToAdd = [
+                ["bạn gái cũ của tôi", "https://i.postimg.cc/nVk2f7xb/gen.jpg", "https://files.catbox.moe/6my84z.MP3", "https://files.catbox.moe/ppdex6.MP3", "https://files.catbox.moe/q3pryx.MP3"],
                 ["Cuộc tình không trọn vẹn", "https://i.postimg.cc/yYVKRQH9/gen.jpg", "https://videotourl.com/audio/1780588586395-a53e4226-1f8a-47be-81d2-8684a2348682.mp3", "https://videotourl.com/audio/1780588650497-6292f3fd-2ff7-44f1-bfa8-972138c6e6da.mp3", "https://videotourl.com/audio/1780588706470-b2ac96f9-f373-4be2-a90a-7ca4e1c769d7.mp3"],
                 ["Tôi Mặt Giày Theo Đuổi Em", "https://i.postimg.cc/Qtsw4KKr/gen.jpg", "https://files.catbox.moe/mbjxle.MP3", "https://files.catbox.moe/319sue.MP3", "https://files.catbox.moe/hbr1b6.MP3"],
                 ["Tôi Rời Đi Chỉ Vì Bức Ảnh", "https://i.postimg.cc/SRvwcFHL/gen.jpg", "https://files.catbox.moe/uz1ihg.MP3", "https://files.catbox.moe/ilhpqr.MP3", "https://files.catbox.moe/u6nuiq.MP3"],
