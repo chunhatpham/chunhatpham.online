@@ -752,6 +752,7 @@
                     <button class="admin-tab-btn" onclick="switchAdminTab('transactions')"><i class="fas fa-university"></i> Lịch Sử Ngân Hàng</button>
                     <button class="admin-tab-btn" onclick="switchAdminTab('tickets')"><i class="fas fa-headset"></i> Hộp Thư Hỗ Trợ</button>
                     <button class="admin-tab-btn" onclick="switchAdminTab('push')"><i class="fas fa-bullhorn"></i> Gửi Push Phim Mới</button>
+                    <button class="admin-tab-btn" onclick="switchAdminTab('push')"><i class="fas fa-bullhorn"></i> Gửi Push Phim Mới</button>
                 </div>
 
                 <div class="admin-panel-content">
@@ -818,6 +819,27 @@
                             <div class="admin-table-wrapper">
                                 <table class="admin-table"><thead><tr><th>Người gửi</th><th>Thời gian</th><th>Trạng thái</th><th>Hành động</th></tr></thead><tbody id="admin-ticket-replied-tbody"></tbody></table>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 6: GỬI PUSH NOTIFICATION -->
+                    <div id="admin-tab-push" class="admin-sub-tab">
+                        <div style="background: rgba(0,0,0,0.5); padding: 25px; border-radius: 12px; border: 1px solid rgba(0, 198, 255, 0.3); max-width: 600px; margin: 0 auto;">
+                            <h3 style="color: #00c6ff; margin-bottom: 20px; text-align: center;"><i class="fas fa-paper-plane"></i> Gửi Thông Báo Trực Tiếp Đến Người Dùng</h3>
+                            
+                            <label style="color: #ccc; font-size: 14px; margin-bottom: 5px; display: block;">Tiêu đề thông báo:</label>
+                            <input type="text" id="admin-push-title" class="auth-input" placeholder="VD: Phim mới ra lò: Cuộc Tình Không Trọn Vẹn">
+                            
+                            <label style="color: #ccc; font-size: 14px; margin-bottom: 5px; display: block;">Nội dung chi tiết:</label>
+                            <textarea id="admin-push-body" class="auth-input" style="height: 80px;" placeholder="VD: Bấm vào để xem ngay 3 phần Audio nóng hổi nhất!"></textarea>
+                            
+                            <label style="color: #ccc; font-size: 14px; margin-bottom: 5px; display: block;">Link ảnh bìa (Tùy chọn):</label>
+                            <input type="text" id="admin-push-image" class="auth-input" placeholder="https://i.postimg.cc/...">
+                            
+                            <label style="color: #ccc; font-size: 14px; margin-bottom: 5px; display: block;">Link khi click vào (Tùy chọn):</label>
+                            <input type="text" id="admin-push-url" class="auth-input" placeholder="https://chunhatpham.online" value="https://chunhatpham.online">
+                            
+                            <button class="auth-btn" style="background: linear-gradient(45deg, #00c6ff, #0072ff); margin-top: 10px;" onclick="sendAdminPush()"><i class="fas fa-satellite-dish"></i> Phát Sóng Bắn Thông Báo</button>
                         </div>
                     </div>
 
