@@ -2312,8 +2312,10 @@ window.subscribeToPush = async function(silent = false) {
 
         // Tự code Loading để không phá vỡ luồng Async/Await
         const loader = document.getElementById('global-loader-overlay');
-        loader.style.display = 'flex';
-        setTimeout(() => { loader.classList.add('show'); }, 10);
+        if (!silent) {
+            loader.style.display = 'flex';
+            setTimeout(() => { loader.classList.add('show'); }, 10);
+        }
 
         try {
             // Tự động tìm đúng đường dẫn file Service Worker
@@ -2321,7 +2323,11 @@ window.subscribeToPush = async function(silent = false) {
             try { registration = await navigator.serviceWorker.register('sw.js'); } 
             catch (e) { registration = await navigator.serviceWorker.register('frontend/sw.js'); }
             
-            await navigator.serviceWorker.ready;
+            // Thêm giới hạn thời gian chờ để tránh bị treo vô hạn trên một số trình duyệt
+            await Promise.race([
+                navigator.serviceWorker.ready,
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Hết thời gian kết nối Service Worker')), 10000))
+            ]);
 
             // Lấy Public Key từ Server
             const vapidRes = await fetch('https://chunhatpham-online.onrender.com/api/push/vapidPublicKey');
@@ -2343,8 +2349,10 @@ window.subscribeToPush = async function(silent = false) {
             console.error('Push subscription error: ', err);
             if (!silent) showNotification('error', 'Thất Bại', 'Lỗi đăng ký hệ thống ngầm: ' + err.message, 'Đã hiểu');
         } finally {
-            loader.classList.remove('show');
-            setTimeout(() => { loader.style.display = 'none'; }, 300);
+            if (!silent) {
+                loader.classList.remove('show');
+                setTimeout(() => { loader.style.display = 'none'; }, 300);
+            }
         }
     } catch (err) { console.error("Lỗi xin quyền:", err); }
 };
