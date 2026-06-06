@@ -1585,6 +1585,8 @@ window.loadAdminData = async function() {
     
     renderAdminTiers();
     renderAdminDeposits();
+    
+    if(typeof window.loadPushHistory === 'function') window.loadPushHistory();
 };
 
 window.filterAdminStats = function(period, btn) {
@@ -2338,8 +2340,7 @@ window.sendAdminPush = async function() {
     let adminUsername = JSON.parse(localStorage.getItem('cnp_current_user')).username;
     let title = document.getElementById('admin-push-title').value.trim();
     let body = document.getElementById('admin-push-body').value.trim();
-    let imageUrl = document.getElementById('admin-push-image').value.trim();
-    let targetUrl = document.getElementById('admin-push-url').value.trim();
+    let targetUrl = document.getElementById('admin-push-url').value.trim() || 'https://chunhatpham.fun';
 
     if(!title || !body) { showNotification('warning', 'Lỗi', 'Vui lòng nhập đủ Tiêu đề và Nội dung!', 'OK'); return; }
     
@@ -2347,16 +2348,37 @@ window.sendAdminPush = async function() {
         try {
             let res = await fetch('https://chunhatpham-online.onrender.com/api/admin/push/send', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ adminUsername, title, body, imageUrl, targetUrl })
+                body: JSON.stringify({ adminUsername, title, body, targetUrl })
             });
             let data = await res.json();
             if(res.ok) {
                 showNotification('success', 'Đã Gửi', data.message, 'OK');
                 document.getElementById('admin-push-title').value = '';
                 document.getElementById('admin-push-body').value = '';
+                if(typeof window.loadPushHistory === 'function') window.loadPushHistory();
             } else { showNotification('error', 'Lỗi', data.message, 'OK'); }
         } catch(err) { showNotification('error', 'Lỗi Mạng', 'Lỗi hệ thống', 'OK'); }
     });
+};
+
+window.loadPushHistory = async function() {
+    try {
+        let res = await fetch('https://chunhatpham-online.onrender.com/api/admin/push/history');
+        if(res.ok) {
+            let history = await res.json();
+            let html = '';
+            if(history.length > 0) {
+                html = history.map(h => {
+                    let d = new Date(h.createdAt).toLocaleString('vi-VN');
+                    return `<tr><td style="color:#aaa; font-size:12px;">${d}</td><td style="color:#00c6ff; font-weight:bold;">${h.title}</td><td style="color:#ccc;">${h.body}</td><td style="color:#00e676; font-weight:bold;"><i class="fas fa-check-circle"></i> ${h.successCount} máy</td></tr>`;
+                }).join('');
+            } else {
+                html = '<tr><td colspan="4" style="text-align:center; color:#888;">Chưa có thông báo nào được gửi đi.</td></tr>';
+            }
+            let tbody = document.getElementById('admin-push-history-tbody');
+            if(tbody) tbody.innerHTML = html;
+        }
+    } catch(e) { console.error(e); }
 };
 
 if(!window.chatUpdateInterval) {

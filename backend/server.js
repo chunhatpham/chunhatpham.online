@@ -15,6 +15,7 @@ const Notification = require('./models/Notification'); // Model Thông báo
 const ChatMessage = require('./models/ChatMessage'); // Model Chat
 const Movie = require('./models/Movie'); // Model Phim Siêu Cấp
 const Subscription = require('./models/Subscription'); // Model lưu thiết bị nhận Push
+const PushHistory = require('./models/PushHistory'); // Model Lịch sử Push
 const app = express();
 
 app.use(cors());
@@ -415,14 +416,13 @@ app.post('/api/auth/login', async (req, res) => {
 // API GỬI PUSH NOTIFICATION TỪ ADMIN
 app.post('/api/admin/push/send', async (req, res) => {
     try {
-        const { adminUsername, title, body, imageUrl, targetUrl } = req.body;
+        const { adminUsername, title, body, targetUrl } = req.body;
         const admin = await User.findOne({ username: adminUsername });
         if(!admin || admin.role !== 'admin') return res.status(403).json({ message: "Từ chối quyền truy cập!" });
 
         const payload = JSON.stringify({
             title: title || 'ChuNhatPham Thông Báo',
             body: body || 'Có cập nhật mới từ hệ thống.',
-            image: imageUrl,
             icon: 'https://i.postimg.cc/BZTQdwdb/56575EA9-6C1E-453E-A0EE-628BF972D3E7.png',
             url: targetUrl || '/'
         });
@@ -437,8 +437,21 @@ app.post('/api/admin/push/send', async (req, res) => {
                 .catch(err => { if(err.statusCode === 410 || err.statusCode === 404) Subscription.findByIdAndDelete(sub._id).catch(()=>{}); }) // Xóa nếu thiết bị không còn tồn tại
         );
         await Promise.all(pushPromises);
+        
+        // Lưu lịch sử gửi thông báo
+        const newHistory = new PushHistory({ title, body, targetUrl, successCount, adminUsername });
+        await newHistory.save();
+        
         res.status(200).json({ message: `Đã gửi thành công đến ${successCount} thiết bị!` });
     } catch (error) { res.status(500).json({ message: "Lỗi hệ thống khi gửi Push!" }); }
+});
+
+// API LẤY LỊCH SỬ PUSH NOTIFICATION
+app.get('/api/admin/push/history', async (req, res) => {
+    try {
+        const history = await PushHistory.find().sort({ createdAt: -1 }).limit(50);
+        res.status(200).json(history);
+    } catch (error) { res.status(500).json({ message: "Lỗi lấy lịch sử Push" }); }
 });
 
 // ==========================================

@@ -5,9 +5,8 @@ self.addEventListener('push', function(event) {
             body: data.body,
             icon: data.icon || 'https://i.postimg.cc/BZTQdwdb/56575EA9-6C1E-453E-A0EE-628BF972D3E7.png',
             badge: 'https://i.postimg.cc/BZTQdwdb/56575EA9-6C1E-453E-A0EE-628BF972D3E7.png',
-            image: data.image || null,
             vibrate: [200, 100, 200],
-            data: { url: data.url || '/' } // URL để mở khi click vào thông báo
+            data: { url: data.url || 'https://chunhatpham.fun' } // URL để mở khi click vào thông báo
         };
         
         event.waitUntil(
