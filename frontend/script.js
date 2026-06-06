@@ -2310,49 +2310,42 @@ window.subscribeToPush = async function(silent = false) {
             return;
         }
 
-        // Tự code Loading để không phá vỡ luồng Async/Await
-        const loader = document.getElementById('global-loader-overlay');
-        if (!silent) {
-            loader.style.display = 'flex';
-            setTimeout(() => { loader.classList.add('show'); }, 10);
-        }
+        // ĐÓNG GÓI TIẾN TRÌNH KẾT NỐI VÀO HÀM CHẠY NGẦM
+        const runRegistration = async () => {
+            try {
+                let registration;
+                try { registration = await navigator.serviceWorker.register('sw.js'); } 
+                catch (e) { registration = await navigator.serviceWorker.register('frontend/sw.js'); }
+                
+                await Promise.race([
+                    navigator.serviceWorker.ready,
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('Hết thời gian kết nối Service Worker')), 10000))
+                ]);
 
-        try {
-            // Tự động tìm đúng đường dẫn file Service Worker
-            let registration;
-            try { registration = await navigator.serviceWorker.register('sw.js'); } 
-            catch (e) { registration = await navigator.serviceWorker.register('frontend/sw.js'); }
-            
-            // Thêm giới hạn thời gian chờ để tránh bị treo vô hạn trên một số trình duyệt
-            await Promise.race([
-                navigator.serviceWorker.ready,
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Hết thời gian kết nối Service Worker')), 10000))
-            ]);
+                const vapidRes = await fetch('https://chunhatpham-online.onrender.com/api/push/vapidPublicKey');
+                const vapidPublicKey = await vapidRes.text();
+                
+                const subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+                });
 
-            // Lấy Public Key từ Server
-            const vapidRes = await fetch('https://chunhatpham-online.onrender.com/api/push/vapidPublicKey');
-            const vapidPublicKey = await vapidRes.text();
-            
-            const subscription = await registration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
-            });
+                await fetch('https://chunhatpham-online.onrender.com/api/push/subscribe', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ subscription: subscription, username: username })
+                });
 
-            // Gửi cục đăng ký lên Server lưu lại
-            await fetch('https://chunhatpham-online.onrender.com/api/push/subscribe', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ subscription: subscription, username: username })
-            });
-
-            if (!silent) showNotification('success', 'Đã Kết Nối!', 'Tuyệt vời! Từ giờ bạn sẽ nhận được thông báo ngay khi có siêu phẩm mới ra lò.', 'OK');
-        } catch (err) {
-            console.error('Push subscription error: ', err);
-            if (!silent) showNotification('error', 'Thất Bại', 'Lỗi đăng ký hệ thống ngầm: ' + err.message, 'Đã hiểu');
-        } finally {
-            if (!silent) {
-                loader.classList.remove('show');
-                setTimeout(() => { loader.style.display = 'none'; }, 300);
+                if (!silent) showNotification('success', 'Đã Kết Nối!', 'Tuyệt vời! Từ giờ bạn sẽ nhận được thông báo ngay khi có siêu phẩm mới ra lò.', 'OK');
+            } catch (err) {
+                console.error('Push error: ', err);
             }
+        };
+
+        // DÙNG HÀM LOADING GỐC CỦA WEB: CHẮC CHẮN SẼ TẮT LOADING SAU ĐÚNG 800MS (CHỐNG TREO)
+        if (!silent) {
+            window.executeWithLoading(runRegistration, 800);
+        } else {
+            runRegistration();
         }
     } catch (err) { console.error("Lỗi xin quyền:", err); }
 };
