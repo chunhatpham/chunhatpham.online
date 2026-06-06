@@ -2321,11 +2321,11 @@ window.subscribeToPush = async function(silent = false) {
         // ĐÓNG GÓI TIẾN TRÌNH KẾT NỐI VÀO HÀM CHẠY NGẦM
         const runRegistration = async () => {
             try {
-                let registration;
-                try { registration = await navigator.serviceWorker.register('sw.js'); } 
-                catch (e) { registration = await navigator.serviceWorker.register('frontend/sw.js'); }
+                // Đăng ký file sw.js ở thư mục gốc để tương thích hoàn toàn với Android/iOS PWA
+                const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
                 
                 if (!registration) throw new Error('Không tìm thấy tệp sw.js');
+                await navigator.serviceWorker.ready; // Chờ sẵn sàng để Android không lỗi
 
                 const vapidRes = await fetch('https://chunhatpham-online.onrender.com/api/push/vapidPublicKey');
                 const vapidPublicKey = await vapidRes.text();
@@ -2334,10 +2334,11 @@ window.subscribeToPush = async function(silent = false) {
                     userVisibleOnly: true,
                     applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
                 });
+                const subJSON = subscription.toJSON(); // Định dạng chuẩn cho Android cũ
 
                 const saveRes = await fetch('https://chunhatpham-online.onrender.com/api/push/subscribe', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ subscription: subscription, username: username })
+                    body: JSON.stringify({ subscription: subJSON, username: username })
                 });
 
                 if (saveRes.ok) {
@@ -2415,12 +2416,8 @@ if(!window.chatUpdateInterval) {
 // ĐĂNG KÝ SERVICE WORKER ĐỂ HỨNG THÔNG BÁO CHẠY NGẦM TỪ ĐIỆN THOẠI
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
-        navigator.serviceWorker.register('sw.js')
+        navigator.serviceWorker.register('/sw.js', { scope: '/' })
             .then(function(reg) { console.log('Đã đăng ký hệ thống nhận thông báo ngầm!'); })
-            .catch(function(err) { 
-                navigator.serviceWorker.register('frontend/sw.js')
-                    .then(function(reg) { console.log('Đã đăng ký hệ thống nhận thông báo ngầm (fallback)!'); })
-                    .catch(function(err) { console.log('Lỗi đăng ký nhận thông báo: ', err); });
-            });
+            .catch(function(err) { console.log('Lỗi đăng ký nhận thông báo: ', err); });
     });
 }
