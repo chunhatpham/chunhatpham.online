@@ -1955,7 +1955,7 @@ window.closeForgotModal = function() {
 
 window.requestResetOtp = async function() {
     let identifier = document.getElementById('fw-identifier').value.trim();
-    if(!identifier) { showNotification('warning', 'Thiếu Thông Tin', 'Vui lòng nhập Email hoặc Username!', 'Đã hiểu'); return; }
+    if(!identifier) { showNotification('warning', 'Chưa Nhập Dữ Liệu', 'Vui lòng điền Tên tài khoản, SĐT hoặc Email của bạn trước khi bấm nút!', 'Đã hiểu'); return; }
     
     window.executeWithLoading(async () => {
         try {
@@ -1967,9 +1967,8 @@ window.requestResetOtp = async function() {
             if(res.ok) {
                 document.getElementById('fw-step-1').classList.remove('active');
                 document.getElementById('fw-step-2').classList.add('active');
-                document.getElementById('fw-target-contact').innerText = data.maskedEmail;
-                document.getElementById('fw-hidden-email').value = data.email;
-                showNotification('success', 'Thành Công', 'Đã gửi mã OTP vào email của bạn!', 'Đóng');
+                document.getElementById('fw-hidden-username').value = data.username;
+                showNotification('success', 'Đã Gửi Yêu Cầu', 'Đã báo cáo lên hệ thống. Vui lòng liên hệ với Admin để nhận mã OTP đổi mật khẩu!', 'Đã Hiểu');
             } else {
                 showNotification('error', 'Lỗi', data.message, 'Đóng');
             }
@@ -1980,7 +1979,7 @@ window.requestResetOtp = async function() {
 };
 
 window.submitNewPassword = async function() {
-    let email = document.getElementById('fw-hidden-email').value;
+    let username = document.getElementById('fw-hidden-username').value;
     let otp = document.getElementById('fw-otp').value.trim();
     let newPass = document.getElementById('fw-new-pass').value.trim();
     
@@ -1991,7 +1990,7 @@ window.submitNewPassword = async function() {
         try {
             let res = await fetch('https://chunhatpham-online.onrender.com/api/auth/reset-password', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, otp, newPassword: newPass })
+                body: JSON.stringify({ username, otp, newPassword: newPass })
             });
             let data = await res.json();
             if(res.ok) {

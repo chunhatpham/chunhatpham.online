@@ -1053,16 +1053,16 @@
             <!-- BƯỚC 1: Nhập Liên Hệ -->
             <div class="forgot-step active" id="fw-step-1">
                 <h2>Quên Mật Khẩu</h2>
-                <p>Nhập <strong>Tên tài khoản</strong> hoặc <strong>Email</strong> của bạn. Chúng tôi sẽ gửi mã OTP đến Email mà bạn đã liên kết.</p>
-                <input type="text" id="fw-identifier" class="fw-input" placeholder="Tên tài khoản hoặc Email...">
+                <p>Nhập <strong>Tên tài khoản</strong>, <strong>SĐT</strong> hoặc <strong>Email</strong> của bạn. Yêu cầu của bạn sẽ được gửi tới Admin xử lý.</p>
+                <input type="text" id="fw-identifier" class="fw-input" placeholder="Nhập Tên tài khoản, SĐT hoặc Email...">
                 <button class="btn-fw" onclick="requestResetOtp()">Nhận Mã Xác Thực</button>
             </div>
 
             <!-- BƯỚC 2: Nhập OTP & Đổi Mật Khẩu -->
             <div class="forgot-step" id="fw-step-2">
                 <h2>Đổi Mật Khẩu</h2>
-                <p>Mã OTP đã được gửi đến Email: <strong id="fw-target-contact" style="color: #00c6ff;"></strong>. Mã có hiệu lực trong 10 phút.</p>
-                <input type="hidden" id="fw-hidden-email">
+                <p>Yêu cầu đã được báo cáo. Vui lòng liên hệ Admin nhận <strong>Mã OTP</strong> để đổi mật khẩu (Mã có hiệu lực 10 phút).</p>
+                <input type="hidden" id="fw-hidden-username">
                 <input type="text" id="fw-otp" class="fw-input" placeholder="Nhập mã OTP (6 số)..." maxlength="6" style="letter-spacing: 5px; font-weight: bold; color: #f5c518;">
                 <p style="margin-bottom: 5px; text-align: left; color: #fff;">Tạo mật khẩu mới:</p>
                 <input type="password" id="fw-new-pass" class="fw-input" placeholder="Nhập mật khẩu mới..." style="text-align: left;">

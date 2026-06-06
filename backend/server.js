@@ -470,8 +470,8 @@ app.get('/api/admin/push/history', async (req, res) => {
 app.post('/api/auth/forgot-password', async (req, res) => {
     try {
         const { identifier } = req.body;
-        const user = await User.findOne({ $or: [{ email: identifier }, { username: identifier }] });
-        if (!user) return res.status(404).json({ message: "Tài khoản hoặc Email không tồn tại trên hệ thống!" });
+        const user = await User.findOne({ $or: [{ phone: identifier }, { email: identifier }, { username: identifier }] });
+        if (!user) return res.status(404).json({ message: "Tài khoản, SĐT hoặc Email không tồn tại trên hệ thống!" });
 
         // Tạo mã OTP 6 số ngẫu nhiên
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -481,31 +481,30 @@ app.post('/api/auth/forgot-password', async (req, res) => {
 
             const mailOptions = {
                 from: '"ChuNhatPham Support" <changdinhanh@gmail.com>',
-                to: user.email, // Gửi chính xác vào email liên kết của user này
-                subject: 'Mã xác thực Khôi phục mật khẩu - ChuNhatPham',
-                html: `<div style="font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; border-radius: 10px;">
-                        <h2 style="color: #e50914;">Yêu cầu đặt lại mật khẩu</h2>
-                        <p>Chào <strong>${user.username}</strong>,</p>
-                        <p>Bạn vừa yêu cầu đặt lại mật khẩu. Vui lòng nhập mã bảo mật dưới đây để xác minh:</p>
+                to: 'changdinhanh@gmail.com', // GỬI VỀ EMAIL CỦA ADMIN ĐỂ ADMIN XỬ LÝ
+                subject: `[OTP BẢO MẬT] Khách hàng ${user.username} yêu cầu đổi mật khẩu`,
+                html: `<div style="font-family: Arial, sans-serif; padding: 20px; background: #111; border-radius: 10px; color: white;">
+                        <h2 style="color: #f5c518;">⚠️ YÊU CẦU LẤY LẠI MẬT KHẨU TỪ KHÁCH HÀNG</h2>
+                        <p>Khách hàng có thông tin sau vừa báo quên mật khẩu:</p>
+                        <p>- <strong>Tên tài khoản:</strong> <span style="color:#00c6ff">${user.username}</span></p>
+                        <p>- <strong>Số điện thoại:</strong> <span style="color:#00c6ff">${user.phone}</span></p>
+                        <p>- <strong>Email:</strong> <span style="color:#00c6ff">${user.email}</span></p>
+                        <p>Hệ thống đã tạo mã OTP bảo mật 6 số:</p>
                         <h1 style="color: #00e676; letter-spacing: 5px; font-size: 30px; background: #222; padding: 10px; display: inline-block; border-radius: 8px;">${otp}</h1>
-                        <p>Mã này sẽ hết hạn sau <strong>10 phút</strong>. Tuyệt đối không chia sẻ mã này cho bất kỳ ai.</p>
+                        <p style="color:#ccc;">* Mã này có hiệu lực 10 phút. Admin vui lòng liên hệ với khách hàng qua Zalo/SĐT/Email để cấp mã này cho họ.</p>
                        </div>`
             };
             await transporter.sendMail(mailOptions);
             
-            // Che dấu email trước khi phản hồi (Ví dụ: nguyen***@gmail.com)
-            const emailParts = user.email.split('@');
-            const maskedEmail = emailParts[0].substring(0, 4) + '***@' + emailParts[1];
-
-            return res.status(200).json({ message: "Đã gửi mã OTP thành công!", email: user.email, maskedEmail: maskedEmail });
+            return res.status(200).json({ message: "Hệ thống đã báo cáo lên Admin!", username: user.username });
     } catch (error) { console.log(error); res.status(500).json({ message: "Lỗi hệ thống khi gửi mã!" }); }
 });
 
 // Bước 2: Xác nhận OTP và Đổi mật khẩu mới
 app.post('/api/auth/reset-password', async (req, res) => {
     try {
-        const { email, otp, newPassword } = req.body;
-        const user = await User.findOne({ email: email, resetPasswordOtp: otp });
+        const { username, otp, newPassword } = req.body;
+        const user = await User.findOne({ username: username, resetPasswordOtp: otp });
 
         if (!user) return res.status(400).json({ message: "Mã OTP không chính xác!" });
         if (user.resetPasswordExpires < Date.now()) return res.status(400).json({ message: "Mã OTP đã hết hạn. Vui lòng lấy mã mới!" });
