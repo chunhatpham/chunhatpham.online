@@ -2325,10 +2325,7 @@ window.subscribeToPush = async function(silent = false) {
                 try { registration = await navigator.serviceWorker.register('sw.js'); } 
                 catch (e) { registration = await navigator.serviceWorker.register('frontend/sw.js'); }
                 
-                await Promise.race([
-                    navigator.serviceWorker.ready,
-                    new Promise((_, reject) => setTimeout(() => reject(new Error('Hết thời gian kết nối Service Worker')), 10000))
-                ]);
+                if (!registration) throw new Error('Không tìm thấy tệp sw.js');
 
                 const vapidRes = await fetch('https://chunhatpham-online.onrender.com/api/push/vapidPublicKey');
                 const vapidPublicKey = await vapidRes.text();
@@ -2338,14 +2335,19 @@ window.subscribeToPush = async function(silent = false) {
                     applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
                 });
 
-                await fetch('https://chunhatpham-online.onrender.com/api/push/subscribe', {
+                const saveRes = await fetch('https://chunhatpham-online.onrender.com/api/push/subscribe', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ subscription: subscription, username: username })
                 });
 
-                if (!silent) showNotification('success', 'Đã Kết Nối!', 'Tuyệt vời! Từ giờ bạn sẽ nhận được thông báo ngay khi có siêu phẩm mới ra lò.', 'OK');
+                if (saveRes.ok) {
+                    if (!silent) showNotification('success', 'Đã Kết Nối!', 'Tuyệt vời! Từ giờ bạn sẽ nhận được thông báo ngay khi có siêu phẩm mới ra lò.', 'OK');
+                } else {
+                    throw new Error('Lưu dữ liệu lên Máy chủ thất bại');
+                }
             } catch (err) {
                 console.error('Push error: ', err);
+                if (!silent) showNotification('error', 'Thất Bại', 'Lỗi hệ thống: ' + err.message, 'Đóng');
             }
         };
 
