@@ -1424,15 +1424,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isStandalone || userClosedBanner) {
             if (installBanner) installBanner.style.display = 'none';
         }
-            
-            // TỰ ĐỘNG HỎI QUYỀN THÔNG BÁO KHI NGƯỜI DÙNG MỞ APP TỪ MÀN HÌNH CHÍNH
-            if (isStandalone) {
-                let currentUser = JSON.parse(localStorage.getItem('cnp_current_user'));
-                if (currentUser && 'Notification' in window && Notification.permission === 'default') {
-                    setTimeout(() => { window.subscribeToPush(); }, 2000); // Đợi 2s cho app tải xong rồi hiện bảng hỏi
-                }
-            }
     }, 50);
+
+        // TỰ ĐỘNG HIỂN THỊ BẢNG XIN QUYỀN THÔNG BÁO SAU 4 GIÂY (NẾU CHƯA TỪ CHỐI)
+        setTimeout(() => { window.checkAndAskForPushPermission(); }, 4000);
 
     // KHỞI TẠO LỊCH FLAT PICKER (NÚT TÙY CHỈNH KHOẢNG THỜI GIAN)
     if (typeof flatpickr !== 'undefined') {
@@ -2275,16 +2270,46 @@ function urlBase64ToUint8Array(base64String) {
     return outputArray;
 }
 
-window.subscribeToPush = async function() {
-    let currentUser = JSON.parse(localStorage.getItem('cnp_current_user'));
-    if(!currentUser) { showNotification('warning', 'Yêu cầu', 'Hãy đăng nhập để bật thông báo!', 'OK'); return; }
-    
+window.checkAndAskForPushPermission = function() {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-        showNotification('info', 'Không hỗ trợ', 'Trình duyệt của bạn chưa hỗ trợ thông báo đẩy.', 'Đã hiểu'); return;
+        return; // Trình duyệt không hỗ trợ, bỏ qua
     }
+    // Nếu người dùng đã từng bấm "Để sau" thì không làm phiền họ nữa
+    if (localStorage.getItem('cnp_push_declined') === 'true') return;
+
+    if (Notification.permission === 'default') {
+        // Hiện bảng xin phép cực đẹp
+        document.getElementById('push-permission-modal').classList.add('show');
+    } else if (Notification.permission === 'granted') {
+        // Đã cấp quyền từ trước, âm thầm kết nối lại với Server (trong trường hợp họ bị mất Token)
+        window.subscribeToPush(true);
+    }
+};
+
+window.acceptPush = function() {
+    document.getElementById('push-permission-modal').classList.remove('show');
+    window.subscribeToPush(false);
+};
+
+window.declinePush = function() {
+    document.getElementById('push-permission-modal').classList.remove('show');
+    localStorage.setItem('cnp_push_declined', 'true'); // Nhớ lựa chọn để không làm phiền
+};
+
+window.subscribeToPush = async function(silent = false) {
+    let currentUser = JSON.parse(localStorage.getItem('cnp_current_user'));
+    // Nếu chưa đăng nhập, cấp tạm tên Khách để vẫn gửi thông báo được
+    let username = currentUser ? currentUser.username : "Khach_" + Math.floor(Math.random() * 100000);
 
     window.executeWithLoading(async () => {
         try {
+            // Kích hoạt hỏi quyền thực tế của Trình Duyệt / Hệ điều hành
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') {
+                if (!silent) showNotification('error', 'Từ Chối', 'Bạn đã từ chối nhận thông báo. Bạn có thể mở lại trong cài đặt của trình duyệt.', 'Đã hiểu');
+                return;
+            }
+
             // Lấy Public Key từ Server
             const vapidRes = await fetch('https://chunhatpham-online.onrender.com/api/push/vapidPublicKey');
             const vapidPublicKey = await vapidRes.text();
@@ -2298,14 +2323,13 @@ window.subscribeToPush = async function() {
             // Gửi cục đăng ký lên Server lưu lại
             await fetch('https://chunhatpham-online.onrender.com/api/push/subscribe', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ subscription: subscription, username: currentUser.username })
+                body: JSON.stringify({ subscription: subscription, username: username })
             });
 
-            showNotification('success', 'Bật Thành Công', 'Từ giờ bạn sẽ nhận được thông báo ngay khi Admin đăng phim mới!', 'Tuyệt Vời');
-            document.getElementById('btn-subscribe-push').innerHTML = '<i class="fas fa-check-circle"></i> Đã Bật Thông Báo';
+            if (!silent) showNotification('success', 'Đã Kết Nối!', 'Tuyệt vời! Từ giờ bạn sẽ nhận được thông báo ngay khi có siêu phẩm mới ra lò.', 'OK');
         } catch (err) {
             console.error('Push subscription error: ', err);
-            showNotification('error', 'Thất Bại', 'Bạn đã chặn quyền gửi thông báo. Hãy bấm vào biểu tượng Ổ Khóa trên thanh địa chỉ của trình duyệt để cấp quyền lại nhé.', 'Đã hiểu');
+            if (!silent) showNotification('error', 'Thất Bại', 'Trình duyệt chặn quyền gửi thông báo. Vui lòng bấm vào biểu tượng Ổ Khóa trên thanh địa chỉ để cấp quyền.', 'Đã hiểu');
         }
     });
 };

@@ -642,10 +642,6 @@
                     </div>
                     
                     <div style="display: flex; gap: 15px; flex-direction: column;">
-                        <button class="auth-btn" id="btn-subscribe-push" style="background: linear-gradient(45deg, #00c6ff, #00e676); color: black; box-shadow: 0 5px 15px rgba(0, 230, 118, 0.3);" onclick="subscribeToPush()">
-                            <i class="fas fa-bell"></i> Bật Nhận Thông Báo Phim Mới
-                        </button>
-                        
                         <button class="auth-btn" style="background: rgba(229, 9, 20, 0.1); border: 2px solid #e50914; color: #ff4e00; box-shadow: none;" onclick="handleLogout()">
                             <i class="fas fa-sign-out-alt"></i> Đăng Xuất An Toàn
                         </button>
@@ -1026,6 +1022,19 @@
                 <input type="password" id="fw-new-pass" class="fw-input" placeholder="Nhập mật khẩu mới..." style="text-align: left;">
                 <button class="btn-fw" onclick="submitNewPassword()">Xác Nhận Đổi Mật Khẩu</button>
                 <button class="btn-fw-back" onclick="document.getElementById('fw-step-2').classList.remove('active'); document.getElementById('fw-step-1').classList.add('active');"><i class="fas fa-arrow-left"></i> Quay lại Bước 1</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL XIN QUYỀN GỬI THÔNG BÁO TỰ ĐỘNG -->
+    <div class="global-modal-overlay" id="push-permission-modal">
+        <div class="global-modal-box" style="text-align: center; max-width: 400px;">
+            <div style="font-size: 50px; color: #00e676; margin-bottom: 15px; animation: shake 1s infinite alternate;"><i class="fas fa-bell"></i></div>
+            <h2 style="color: white; margin-bottom: 15px; font-size: 22px;">Nhận Thông Báo Phim Mới!</h2>
+            <p style="color: #ccc; margin-bottom: 25px; line-height: 1.5; font-size: 14.5px;">Bạn có muốn nhận thông báo từ <strong>chunhatpham</strong> mỗi khi có tập phim mới ra mắt không? Đừng bỏ lỡ những siêu phẩm nhé!</p>
+            <div style="display: flex; gap: 15px;">
+                <button class="auth-btn" style="background: rgba(255,255,255,0.1); color: #ccc; box-shadow: none; font-size: 15px;" onclick="declinePush()">Để Sau</button>
+                <button class="auth-btn" style="background: linear-gradient(45deg, #00c6ff, #00e676); color: black; font-size: 15px; font-weight: 900; box-shadow: 0 5px 15px rgba(0, 230, 118, 0.3);" onclick="acceptPush()"><i class="fas fa-check"></i> Đồng Ý</button>
             </div>
         </div>
     </div>
