@@ -2303,37 +2303,40 @@ window.subscribeToPush = async function(silent = false) {
     // Nếu chưa đăng nhập, cấp tạm tên Khách để vẫn gửi thông báo được
     let username = currentUser ? currentUser.username : "Khach_" + Math.floor(Math.random() * 100000);
 
-    window.executeWithLoading(async () => {
-        try {
-            // Kích hoạt hỏi quyền thực tế của Trình Duyệt / Hệ điều hành
-            const permission = await Notification.requestPermission();
-            if (permission !== 'granted') {
-                if (!silent) showNotification('error', 'Từ Chối', 'Bạn đã từ chối nhận thông báo. Bạn có thể mở lại trong cài đặt của trình duyệt.', 'Đã hiểu');
-                return;
-            }
-
-            // Lấy Public Key từ Server
-            const vapidRes = await fetch('https://chunhatpham-online.onrender.com/api/push/vapidPublicKey');
-            const vapidPublicKey = await vapidRes.text();
-            
-            const registration = await navigator.serviceWorker.ready;
-            const subscription = await registration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
-            });
-
-            // Gửi cục đăng ký lên Server lưu lại
-            await fetch('https://chunhatpham-online.onrender.com/api/push/subscribe', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ subscription: subscription, username: username })
-            });
-
-            if (!silent) showNotification('success', 'Đã Kết Nối!', 'Tuyệt vời! Từ giờ bạn sẽ nhận được thông báo ngay khi có siêu phẩm mới ra lò.', 'OK');
-        } catch (err) {
-            console.error('Push subscription error: ', err);
-            if (!silent) showNotification('error', 'Thất Bại', 'Trình duyệt chặn quyền gửi thông báo. Vui lòng bấm vào biểu tượng Ổ Khóa trên thanh địa chỉ để cấp quyền.', 'Đã hiểu');
+    try {
+        // PHẢI GỌI TRỰC TIẾP, KHÔNG ĐƯỢC BỌC TRONG SETTIMEOUT CỦA LOADING
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+            if (!silent) showNotification('error', 'Từ Chối', 'Bạn đã từ chối nhận thông báo. Bạn có thể mở lại trong cài đặt của trình duyệt.', 'Đã hiểu');
+            return;
         }
-    });
+
+        // Sau khi khách đã cấp quyền xong mới bật bảng Loading để kết nối máy chủ
+        window.executeWithLoading(async () => {
+            try {
+                // Lấy Public Key từ Server
+                const vapidRes = await fetch('https://chunhatpham-online.onrender.com/api/push/vapidPublicKey');
+                const vapidPublicKey = await vapidRes.text();
+                
+                const registration = await navigator.serviceWorker.ready;
+                const subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+                });
+
+                // Gửi cục đăng ký lên Server lưu lại
+                await fetch('https://chunhatpham-online.onrender.com/api/push/subscribe', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ subscription: subscription, username: username })
+                });
+
+                if (!silent) showNotification('success', 'Đã Kết Nối!', 'Tuyệt vời! Từ giờ bạn sẽ nhận được thông báo ngay khi có siêu phẩm mới ra lò.', 'OK');
+            } catch (err) {
+                console.error('Push subscription error: ', err);
+                if (!silent) showNotification('error', 'Thất Bại', 'Lỗi khi đăng ký nhận thông báo với máy chủ.', 'Đã hiểu');
+            }
+        });
+    } catch (err) { console.error("Lỗi xin quyền:", err); }
 };
 
 window.sendAdminPush = async function() {
