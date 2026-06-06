@@ -175,6 +175,7 @@ mongoose.connect(dbURI)
             
             // TÍNH NĂNG THÊM PHIM MỚI TỰ ĐỘNG (KHÔNG LÀM MẤT VIEW/LIKE CŨ)
             const newMoviesToAdd = [
+                ["tôi phải kết hôn thay anh trai", "https://i.postimg.cc/xThxngvy/gen.jpg", "https://files.catbox.moe/us3y63.MP3", "https://files.catbox.moe/m6oyy3.MP3", "https://files.catbox.moe/znotg0.MP3"],
                 ["bạn gái mất đi kí ức cũ", "https://i.postimg.cc/659W5mTd/gen.jpg", "https://files.catbox.moe/s5vjv4.MP3", "https://files.catbox.moe/i32dbu.MP3", "https://files.catbox.moe/mbmp05.MP3"],
                 ["làm con nuôi của nhà giàu", "https://i.postimg.cc/nLKSLgJm/3AA019A7-A027-4602-8A02-245E09196889.jpg", "https://files.catbox.moe/on4vms.MP3", "https://files.catbox.moe/yfeack.MP3", "https://files.catbox.moe/uxw41t.MP3"],
                 ["bạn gái cũ của tôi", "https://i.postimg.cc/nVk2f7xb/gen.jpg", "https://files.catbox.moe/6my84z.MP3", "https://files.catbox.moe/ppdex6.MP3", "https://files.catbox.moe/q3pryx.MP3"],
