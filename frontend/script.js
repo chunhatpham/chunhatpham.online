@@ -2304,38 +2304,48 @@ window.subscribeToPush = async function(silent = false) {
     let username = currentUser ? currentUser.username : "Khach_" + Math.floor(Math.random() * 100000);
 
     try {
-        // PHẢI GỌI TRỰC TIẾP, KHÔNG ĐƯỢC BỌC TRONG SETTIMEOUT CỦA LOADING
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') {
             if (!silent) showNotification('error', 'Từ Chối', 'Bạn đã từ chối nhận thông báo. Bạn có thể mở lại trong cài đặt của trình duyệt.', 'Đã hiểu');
             return;
         }
 
-        // Sau khi khách đã cấp quyền xong mới bật bảng Loading để kết nối máy chủ
-        window.executeWithLoading(async () => {
-            try {
-                // Lấy Public Key từ Server
-                const vapidRes = await fetch('https://chunhatpham-online.onrender.com/api/push/vapidPublicKey');
-                const vapidPublicKey = await vapidRes.text();
-                
-                const registration = await navigator.serviceWorker.ready;
-                const subscription = await registration.pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
-                });
+        // Tự code Loading để không phá vỡ luồng Async/Await
+        const loader = document.getElementById('global-loader-overlay');
+        loader.style.display = 'flex';
+        setTimeout(() => { loader.classList.add('show'); }, 10);
 
-                // Gửi cục đăng ký lên Server lưu lại
-                await fetch('https://chunhatpham-online.onrender.com/api/push/subscribe', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ subscription: subscription, username: username })
-                });
+        try {
+            // Tự động tìm đúng đường dẫn file Service Worker
+            let registration;
+            try { registration = await navigator.serviceWorker.register('sw.js'); } 
+            catch (e) { registration = await navigator.serviceWorker.register('frontend/sw.js'); }
+            
+            await navigator.serviceWorker.ready;
 
-                if (!silent) showNotification('success', 'Đã Kết Nối!', 'Tuyệt vời! Từ giờ bạn sẽ nhận được thông báo ngay khi có siêu phẩm mới ra lò.', 'OK');
-            } catch (err) {
-                console.error('Push subscription error: ', err);
-                if (!silent) showNotification('error', 'Thất Bại', 'Lỗi khi đăng ký nhận thông báo với máy chủ.', 'Đã hiểu');
-            }
-        });
+            // Lấy Public Key từ Server
+            const vapidRes = await fetch('https://chunhatpham-online.onrender.com/api/push/vapidPublicKey');
+            const vapidPublicKey = await vapidRes.text();
+            
+            const subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+            });
+
+            // Gửi cục đăng ký lên Server lưu lại
+            await fetch('https://chunhatpham-online.onrender.com/api/push/subscribe', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ subscription: subscription, username: username })
+            });
+
+            if (!silent) showNotification('success', 'Đã Kết Nối!', 'Tuyệt vời! Từ giờ bạn sẽ nhận được thông báo ngay khi có siêu phẩm mới ra lò.', 'OK');
+        } catch (err) {
+            console.error('Push subscription error: ', err);
+            if (!silent) showNotification('error', 'Thất Bại', 'Lỗi đăng ký hệ thống ngầm: ' + err.message, 'Đã hiểu');
+        } finally {
+            loader.classList.remove('show');
+            setTimeout(() => { loader.style.display = 'none'; }, 300);
+        }
     } catch (err) { console.error("Lỗi xin quyền:", err); }
 };
 
@@ -2396,6 +2406,10 @@ if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
         navigator.serviceWorker.register('sw.js')
             .then(function(reg) { console.log('Đã đăng ký hệ thống nhận thông báo ngầm!'); })
-            .catch(function(err) { console.log('Lỗi đăng ký nhận thông báo: ', err); });
+            .catch(function(err) { 
+                navigator.serviceWorker.register('frontend/sw.js')
+                    .then(function(reg) { console.log('Đã đăng ký hệ thống nhận thông báo ngầm (fallback)!'); })
+                    .catch(function(err) { console.log('Lỗi đăng ký nhận thông báo: ', err); });
+            });
     });
 }

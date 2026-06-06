@@ -432,11 +432,19 @@ app.post('/api/admin/push/send', async (req, res) => {
         let successCount = 0;
 
         // Bắn thông báo đến toàn bộ các máy đã đăng ký
-        const pushPromises = subscriptions.map(sub => 
-            webpush.sendNotification(sub, payload)
+        const pushPromises = subscriptions.map(sub => {
+            // Định dạng lại Object chuẩn cho thư viện web-push (Tránh truyền trực tiếp Mongoose Document)
+            const pushSub = {
+                endpoint: sub.endpoint,
+                keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth }
+            };
+            return webpush.sendNotification(pushSub, payload)
                 .then(() => { successCount++; })
-                .catch(err => { if(err.statusCode === 410 || err.statusCode === 404) Subscription.findByIdAndDelete(sub._id).catch(()=>{}); }) // Xóa nếu thiết bị không còn tồn tại
-        );
+                .catch(err => { 
+                    console.log(`[PUSH LỖI] Máy: ${sub.username} | Chi tiết:`, err.message);
+                    if(err.statusCode === 410 || err.statusCode === 404) Subscription.findByIdAndDelete(sub._id).catch(()=>{}); 
+                });
+        });
         await Promise.all(pushPromises);
         
         // Lưu lịch sử gửi thông báo
