@@ -3,6 +3,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer'); // Thêm thư viện gửi Email
+const webpush = require('web-push'); // Thêm thư viện Push Notification
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
@@ -13,6 +14,7 @@ const Ticket = require('./models/Ticket'); // Model Hỗ trợ
 const Notification = require('./models/Notification'); // Model Thông báo
 const ChatMessage = require('./models/ChatMessage'); // Model Chat
 const Movie = require('./models/Movie'); // Model Phim Siêu Cấp
+const Subscription = require('./models/Subscription'); // Model lưu thiết bị nhận Push
 const app = express();
 
 app.use(cors());
@@ -31,6 +33,13 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS || 'qhkgxdbglzzcwdex'        // Mật khẩu ứng dụng Gmail của bạn
     }
 });
+
+// CẤU HÌNH WEB PUSH (Thay khóa của bạn vào đây)
+const publicVapidKey = process.env.VAPID_PUBLIC_KEY || 'BJ7wYCeKo6fpKEA6SS4nugJUymWZUvygCZuU7IVztNO29kmk2Ktk1rBJF3yylrXmg6_01wb9m0s2vJIDukbsotU';
+const privateVapidKey = process.env.VAPID_PRIVATE_KEY || 'ajFoFIFSnr6-3Y1tlOQ8BiAPqhUSFtKLseyYkfKVL5Y';
+if(publicVapidKey !== 'THAY_PUBLIC_KEY_CỦA_BẠN_VÀO_ĐÂY') {
+    webpush.setVapidDetails('mailto:changdinhanh@gmail.com', publicVapidKey, privateVapidKey);
+}
 
 // ==========================================
 // 1. KẾT NỐI DATABASE (MONGODB)
@@ -276,6 +285,26 @@ mongoose.connect(dbURI)
     });
 
 // ==========================================
+// API LƯU THIẾT BỊ NHẬN THÔNG BÁO PUSH
+// ==========================================
+app.get('/api/push/vapidPublicKey', (req, res) => {
+    res.status(200).send(publicVapidKey);
+});
+
+app.post('/api/push/subscribe', async (req, res) => {
+    try {
+        const { subscription, username } = req.body;
+        // Lưu đè nếu máy này đã đăng ký rồi
+        await Subscription.findOneAndUpdate(
+            { endpoint: subscription.endpoint },
+            { username, endpoint: subscription.endpoint, keys: subscription.keys },
+            { upsert: true, new: true }
+        );
+        res.status(201).json({ message: "Đăng ký nhận thông báo thành công!" });
+    } catch (error) { res.status(500).json({ message: "Lỗi lưu đăng ký thông báo" }); }
+});
+
+// ==========================================
 // 2. CÁC API HỆ THỐNG CƠ BẢN
 // ==========================================
 app.get('/', (req, res) => { res.send('Máy chủ ChuNhatPham đang hoạt động!'); });
@@ -381,6 +410,35 @@ app.post('/api/auth/login', async (req, res) => {
         console.error("LỖI ĐĂNG NHẬP BACKEND:", error);
         res.status(500).json({ message: "Lỗi hệ thống: " + (error.message || error) }); 
     }
+});
+
+// API GỬI PUSH NOTIFICATION TỪ ADMIN
+app.post('/api/admin/push/send', async (req, res) => {
+    try {
+        const { adminUsername, title, body, imageUrl, targetUrl } = req.body;
+        const admin = await User.findOne({ username: adminUsername });
+        if(!admin || admin.role !== 'admin') return res.status(403).json({ message: "Từ chối quyền truy cập!" });
+
+        const payload = JSON.stringify({
+            title: title || 'ChuNhatPham Thông Báo',
+            body: body || 'Có cập nhật mới từ hệ thống.',
+            image: imageUrl,
+            icon: 'https://i.postimg.cc/BZTQdwdb/56575EA9-6C1E-453E-A0EE-628BF972D3E7.png',
+            url: targetUrl || '/'
+        });
+
+        const subscriptions = await Subscription.find();
+        let successCount = 0;
+
+        // Bắn thông báo đến toàn bộ các máy đã đăng ký
+        const pushPromises = subscriptions.map(sub => 
+            webpush.sendNotification(sub, payload)
+                .then(() => { successCount++; })
+                .catch(err => { if(err.statusCode === 410 || err.statusCode === 404) Subscription.findByIdAndDelete(sub._id).catch(()=>{}); }) // Xóa nếu thiết bị không còn tồn tại
+        );
+        await Promise.all(pushPromises);
+        res.status(200).json({ message: `Đã gửi thành công đến ${successCount} thiết bị!` });
+    } catch (error) { res.status(500).json({ message: "Lỗi hệ thống khi gửi Push!" }); }
 });
 
 // ==========================================

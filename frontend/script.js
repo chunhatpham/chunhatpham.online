@@ -1841,6 +1841,7 @@ window.switchTicketTab = function(tabName, btn) {
     document.querySelectorAll('.ticket-tab-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     document.querySelectorAll('.ticket-content-pane').forEach(p => p.classList.remove('active'));
+    if(event && event.currentTarget) event.currentTarget.classList.add('active');
     document.getElementById('ticket-content-' + tabName).classList.add('active');
 };
 
@@ -2252,6 +2253,78 @@ window.scrollToMessage = function(id) {
         chatArea.scrollTo({ top: msgEl.offsetTop - 50, behavior: 'smooth' });
         msgEl.style.boxShadow = "0 0 20px rgba(0, 198, 255, 0.8)"; setTimeout(() => msgEl.style.boxShadow = "none", 1500);
     }
+};
+
+// ================= WEB PUSH NOTIFICATION LOGIC =================
+function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}
+
+window.subscribeToPush = async function() {
+    let currentUser = JSON.parse(localStorage.getItem('cnp_current_user'));
+    if(!currentUser) { showNotification('warning', 'Yêu cầu', 'Hãy đăng nhập để bật thông báo!', 'OK'); return; }
+    
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        showNotification('info', 'Không hỗ trợ', 'Trình duyệt của bạn chưa hỗ trợ thông báo đẩy.', 'Đã hiểu'); return;
+    }
+
+    window.executeWithLoading(async () => {
+        try {
+            // Lấy Public Key từ Server
+            const vapidRes = await fetch('https://chunhatpham-online.onrender.com/api/push/vapidPublicKey');
+            const vapidPublicKey = await vapidRes.text();
+            
+            const registration = await navigator.serviceWorker.ready;
+            const subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+            });
+
+            // Gửi cục đăng ký lên Server lưu lại
+            await fetch('https://chunhatpham-online.onrender.com/api/push/subscribe', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ subscription: subscription, username: currentUser.username })
+            });
+
+            showNotification('success', 'Bật Thành Công', 'Từ giờ bạn sẽ nhận được thông báo ngay khi Admin đăng phim mới!', 'Tuyệt Vời');
+            document.getElementById('btn-subscribe-push').innerHTML = '<i class="fas fa-check-circle"></i> Đã Bật Thông Báo';
+        } catch (err) {
+            console.error('Push subscription error: ', err);
+            showNotification('error', 'Thất Bại', 'Bạn đã chặn quyền gửi thông báo. Hãy bấm vào biểu tượng Ổ Khóa trên thanh địa chỉ của trình duyệt để cấp quyền lại nhé.', 'Đã hiểu');
+        }
+    });
+};
+
+window.sendAdminPush = async function() {
+    let adminUsername = JSON.parse(localStorage.getItem('cnp_current_user')).username;
+    let title = document.getElementById('admin-push-title').value.trim();
+    let body = document.getElementById('admin-push-body').value.trim();
+    let imageUrl = document.getElementById('admin-push-image').value.trim();
+    let targetUrl = document.getElementById('admin-push-url').value.trim();
+
+    if(!title || !body) { showNotification('warning', 'Lỗi', 'Vui lòng nhập đủ Tiêu đề và Nội dung!', 'OK'); return; }
+    
+    window.executeWithLoading(async () => {
+        try {
+            let res = await fetch('https://chunhatpham-online.onrender.com/api/admin/push/send', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ adminUsername, title, body, imageUrl, targetUrl })
+            });
+            let data = await res.json();
+            if(res.ok) {
+                showNotification('success', 'Đã Gửi', data.message, 'OK');
+                document.getElementById('admin-push-title').value = '';
+                document.getElementById('admin-push-body').value = '';
+            } else { showNotification('error', 'Lỗi', data.message, 'OK'); }
+        } catch(err) { showNotification('error', 'Lỗi Mạng', 'Lỗi hệ thống', 'OK'); }
+    });
 };
 
 if(!window.chatUpdateInterval) {
