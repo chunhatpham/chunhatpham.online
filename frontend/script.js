@@ -1424,6 +1424,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isStandalone || userClosedBanner) {
             if (installBanner) installBanner.style.display = 'none';
         }
+            
+            // TỰ ĐỘNG HỎI QUYỀN THÔNG BÁO KHI NGƯỜI DÙNG MỞ APP TỪ MÀN HÌNH CHÍNH
+            if (isStandalone) {
+                let currentUser = JSON.parse(localStorage.getItem('cnp_current_user'));
+                if (currentUser && 'Notification' in window && Notification.permission === 'default') {
+                    setTimeout(() => { window.subscribeToPush(); }, 2000); // Đợi 2s cho app tải xong rồi hiện bảng hỏi
+                }
+            }
     }, 50);
 
     // KHỞI TẠO LỊCH FLAT PICKER (NÚT TÙY CHỈNH KHOẢNG THỜI GIAN)
@@ -2332,4 +2340,13 @@ if(!window.chatUpdateInterval) {
         let tabSingle = document.getElementById('tab-single'); let menu = document.getElementById('chat-context-menu');
         if (tabSingle && tabSingle.classList.contains('active') && (!menu || !menu.classList.contains('show'))) { window.loadChatMessages(); } 
     }, 5000);
+}
+
+// ĐĂNG KÝ SERVICE WORKER ĐỂ HỨNG THÔNG BÁO CHẠY NGẦM TỪ ĐIỆN THOẠI
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('sw.js')
+            .then(function(reg) { console.log('Đã đăng ký hệ thống nhận thông báo ngầm!'); })
+            .catch(function(err) { console.log('Lỗi đăng ký nhận thông báo: ', err); });
+    });
 }
