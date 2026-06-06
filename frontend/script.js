@@ -302,7 +302,10 @@ window.openPlayer = function(movieSlug) {
         let randomAdUrl = adLinks[Math.floor(Math.random() * adLinks.length)];
         window.open(randomAdUrl, '_blank');
 
-        if (window.adUnlockStep < MAX_AD_CLICKS) return; 
+        if (window.adUnlockStep < MAX_AD_CLICKS) {
+            window.executeWithLoading(() => {}, 500); // Thêm Loading ngay cả khi click mở quảng cáo
+            return; 
+        }
     }
     
     // Xóa bộ đếm để lần sau bấm phim khác lại yêu cầu quảng cáo từ đầu
