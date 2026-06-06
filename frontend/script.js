@@ -460,9 +460,11 @@ window.openPlayer = function(movieSlug) {
     }
     document.getElementById('lm-seasons-container').innerHTML = seasonsHtml;
 
-
-    document.getElementById('link-modal-overlay').classList.add('show');
-    setTimeout(() => { addHistoryEntry('watch', movieTitle, 'Đã xem', 0, movieImg); }, 50);
+    // Bổ sung hiệu ứng Loading chuyên nghiệp khi mở phim
+    window.executeWithLoading(() => {
+        document.getElementById('link-modal-overlay').classList.add('show');
+        setTimeout(() => { addHistoryEntry('watch', movieTitle, 'Đã xem', 0, movieImg); }, 50);
+    }, 500);
 };
 
 window.likeCurrentMovie = function() {
@@ -1386,10 +1388,13 @@ window.submitSupportTicket = async function() {
 
 // HÀM ĐÓNG THÔNG BÁO CHÀO MỪNG
 window.closeWelcomeModal = function() {
-    const welcomeOverlay = document.getElementById('welcome-modal-overlay');
-    if (welcomeOverlay) {
-        welcomeOverlay.classList.remove('show');
-    }
+    // Bổ sung hiệu ứng Loading khi đóng bảng Chào mừng
+    window.executeWithLoading(() => {
+        const welcomeOverlay = document.getElementById('welcome-modal-overlay');
+        if (welcomeOverlay) {
+            welcomeOverlay.classList.remove('show');
+        }
+    }, 500);
 };
 
 // ================= KHỞI CHẠY TẤT CẢ KHI LOAD WEB XONG =================
