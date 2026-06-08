@@ -994,6 +994,21 @@ app.post('/api/admin/ticket/reply', async (req, res) => {
     } catch (error) { res.status(500).json({ message: "Lỗi Server" }); }
 });
 
+// API XÓA NHIỀU PHIẾU HỖ TRỢ CÙNG LÚC ĐỂ TỐI ƯU DATABASE
+app.delete('/api/admin/tickets/bulk-delete', async (req, res) => {
+    try {
+        const { ticketIds } = req.body;
+        if (!ticketIds || !Array.isArray(ticketIds) || ticketIds.length === 0) {
+            return res.status(400).json({ message: "Vui lòng chọn ít nhất 1 phiếu để xóa!" });
+        }
+        
+        // Xóa tất cả các phiếu có ID nằm trong mảng ticketIds
+        const result = await Ticket.deleteMany({ _id: { $in: ticketIds } });
+        
+        res.status(200).json({ message: `Đã dọn dẹp thành công ${result.deletedCount} phiếu hỗ trợ (Bao gồm cả dữ liệu ảnh Base64)!` });
+    } catch (error) { console.error(error); res.status(500).json({ message: "Lỗi hệ thống khi xóa phiếu" }); }
+});
+
 // ==========================================
 // 3. API ĐẶC BIỆT: TIẾP NHẬN WEBHOOK TỪ SEPAY
 // ==========================================

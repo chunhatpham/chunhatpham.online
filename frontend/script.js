@@ -1577,15 +1577,15 @@ window.loadAdminData = async function() {
         
         document.getElementById('pending-tickets-badge').innerText = pendingTickets.length;
 
-        let pendingHtml = pendingTickets.map(tk => `<tr><td><strong style="color:white;">${tk.username}</strong><br><span style="font-size:11px;color:#aaa;">${tk.email}</span></td><td>${new Date(tk.createdAt || Date.now()).toLocaleString('vi-VN')}</td><td><span style="color:#ff4e00; font-weight:bold;">Chờ xử lý</span></td><td><button class="btn-admin-action" style="background:#00c6ff; color:white;" onclick="openAdminReplyModal('${tk._id}')"><i class="fas fa-reply"></i> Đọc & Trả Lời</button></td></tr>`).join('');
-        document.getElementById('admin-ticket-pending-tbody').innerHTML = pendingHtml || '<tr><td colspan="4" style="padding: 30px; text-align: center; color: #888;">Không có phiếu chờ xử lý.</td></tr>';
+        let pendingHtml = pendingTickets.map(tk => `<tr><td style="text-align: center;"><input type="checkbox" class="admin-table-checkbox cb-ticket-pending" value="${tk._id}"></td><td><strong style="color:white;">${tk.username}</strong><br><span style="font-size:11px;color:#aaa;">${tk.email}</span></td><td>${new Date(tk.createdAt || Date.now()).toLocaleString('vi-VN')}</td><td><span style="color:#ff4e00; font-weight:bold;">Chờ xử lý</span></td><td><button class="btn-admin-action" style="background:#00c6ff; color:white;" onclick="openAdminReplyModal('${tk._id}')"><i class="fas fa-reply"></i> Đọc & Trả Lời</button></td></tr>`).join('');
+        document.getElementById('admin-ticket-pending-tbody').innerHTML = pendingHtml || '<tr><td colspan="5" style="padding: 30px; text-align: center; color: #888;">Không có phiếu chờ xử lý.</td></tr>';
 
-        let repliedHtml = repliedTickets.map(tk => `<tr><td><strong style="color:white;">${tk.username}</strong><br><span style="font-size:11px;color:#aaa;">${tk.email}</span></td><td>${new Date(tk.createdAt || Date.now()).toLocaleString('vi-VN')}</td><td><span style="color:#00e676;">Đã trả lời</span></td><td><button class="btn-admin-action" style="background:#444; color:white;" onclick="openAdminReplyModal('${tk._id}')"><i class="fas fa-eye"></i> Xem Lại</button></td></tr>`).join('');
-        document.getElementById('admin-ticket-replied-tbody').innerHTML = repliedHtml || '<tr><td colspan="4" style="padding: 30px; text-align: center; color: #888;">Chưa có phiếu nào được xử lý.</td></tr>';
+        let repliedHtml = repliedTickets.map(tk => `<tr><td style="text-align: center;"><input type="checkbox" class="admin-table-checkbox cb-ticket-replied" value="${tk._id}"></td><td><strong style="color:white;">${tk.username}</strong><br><span style="font-size:11px;color:#aaa;">${tk.email}</span></td><td>${new Date(tk.createdAt || Date.now()).toLocaleString('vi-VN')}</td><td><span style="color:#00e676;">Đã trả lời</span></td><td><button class="btn-admin-action" style="background:#444; color:white;" onclick="openAdminReplyModal('${tk._id}')"><i class="fas fa-eye"></i> Xem Lại</button></td></tr>`).join('');
+        document.getElementById('admin-ticket-replied-tbody').innerHTML = repliedHtml || '<tr><td colspan="5" style="padding: 30px; text-align: center; color: #888;">Chưa có phiếu nào được xử lý.</td></tr>';
     } catch (e) {
         console.error("Lỗi tải phiếu hỗ trợ:", e);
-        document.getElementById('admin-ticket-pending-tbody').innerHTML = `<tr><td colspan="4" style="padding: 30px; text-align: center; color: #ff4e00; font-size: 15px;"><strong>LỖI TẢI DỮ LIỆU:</strong><br>${e.message}<br><br><span style="color:#aaa; font-size: 13px;">(Máy chủ Render chưa nhận được Code mới. Vui lòng vào Render.com -> Manual Deploy -> Clear build cache & deploy)</span></td></tr>`;
-        document.getElementById('admin-ticket-replied-tbody').innerHTML = `<tr><td colspan="4" style="padding: 30px; text-align: center; color: #ff4e00;">Lỗi tải dữ liệu: ${e.message}</td></tr>`;
+        document.getElementById('admin-ticket-pending-tbody').innerHTML = `<tr><td colspan="5" style="padding: 30px; text-align: center; color: #ff4e00; font-size: 15px;"><strong>LỖI TẢI DỮ LIỆU:</strong><br>${e.message}<br><br><span style="color:#aaa; font-size: 13px;">(Máy chủ Render chưa nhận được Code mới. Vui lòng vào Render.com -> Manual Deploy -> Clear build cache & deploy)</span></td></tr>`;
+        document.getElementById('admin-ticket-replied-tbody').innerHTML = `<tr><td colspan="5" style="padding: 30px; text-align: center; color: #ff4e00;">Lỗi tải dữ liệu: ${e.message}</td></tr>`;
     }
 
     // Sau khi tải xong tất cả, tính toán thống kê mặc định (Hôm nay)
@@ -1864,6 +1864,48 @@ window.switchTxTab = function(tabName, btn) {
     btn.classList.add('active');
     parentTab.querySelectorAll('.ticket-content-pane').forEach(p => p.classList.remove('active'));
     document.getElementById('tx-content-' + tabName).classList.add('active');
+};
+
+// ================= TÍNH NĂNG CHỌN VÀ XÓA HÀNG LOẠT TICKET (HỖ TRỢ) =================
+window.toggleAllTickets = function(checkboxElem, type) {
+    // type = 'pending' hoặc 'replied'
+    let checkboxes = document.querySelectorAll('.cb-ticket-' + type);
+    checkboxes.forEach(cb => {
+        cb.checked = checkboxElem.checked;
+    });
+};
+
+window.deleteSelectedTickets = async function() {
+    // Thu thập tất cả các checkbox đang được chọn ở cả 2 tab
+    let selectedCheckboxes = document.querySelectorAll('.cb-ticket-pending:checked, .cb-ticket-replied:checked');
+    
+    if (selectedCheckboxes.length === 0) {
+        showNotification('warning', 'Chưa Chọn Phiếu', 'Vui lòng tích vào ô vuông của ít nhất 1 phiếu bạn muốn dọn dẹp!', 'Đã hiểu');
+        return;
+    }
+
+    if (!confirm(`Bạn có chắc chắn muốn XÓA VĨNH VIỄN ${selectedCheckboxes.length} phiếu hỗ trợ này không?\n(Việc này sẽ dọn dẹp cả hình ảnh gốc, giúp tiết kiệm dung lượng Database của bạn rất nhiều)`)) {
+        return;
+    }
+
+    let ticketIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+
+    window.executeWithLoading(async () => {
+        try {
+            let res = await fetch('https://chunhatpham-online.onrender.com/api/admin/tickets/bulk-delete', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ticketIds: ticketIds })
+            });
+            let data = await res.json();
+            if (res.ok) {
+                showNotification('success', 'Dọn Dẹp Hoàn Tất', data.message, 'Tuyệt vời');
+                // Bỏ tích các nút Select All
+                document.querySelectorAll('.admin-table th input[type="checkbox"]').forEach(cb => cb.checked = false);
+                loadAdminData(); // Tải lại bảng để cập nhật dữ liệu mới nhất
+            } else { showNotification('error', 'Lỗi', data.message, 'Đóng'); }
+        } catch (e) { showNotification('error', 'Lỗi Mạng', 'Không kết nối được với máy chủ', 'Đóng'); }
+    });
 };
 
 // ================= TÍNH NĂNG THÔNG BÁO VÀ TRẢ LỜI SUPPORT =================

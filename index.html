@@ -815,14 +815,21 @@
                                 <i class="fas fa-check-double"></i> Đã Xử Lý
                             </button>
                         </div>
+                        
+                        <div class="admin-bulk-action-bar">
+                            <button class="btn-admin-bulk-delete" onclick="deleteSelectedTickets()">
+                                <i class="fas fa-trash-alt"></i> Xóa Mục Đã Chọn
+                            </button>
+                        </div>
+
                         <div id="ticket-content-pending" class="ticket-content-pane active">
                             <div class="admin-table-wrapper">
-                                <table class="admin-table"><thead><tr><th>Người gửi</th><th>Thời gian</th><th>Trạng thái</th><th>Hành động</th></tr></thead><tbody id="admin-ticket-pending-tbody"></tbody></table>
+                                <table class="admin-table"><thead><tr><th style="width: 50px; text-align: center;"><input type="checkbox" class="admin-table-checkbox" onclick="toggleAllTickets(this, 'pending')"></th><th>Người gửi</th><th>Thời gian</th><th>Trạng thái</th><th>Hành động</th></tr></thead><tbody id="admin-ticket-pending-tbody"></tbody></table>
                             </div>
                         </div>
                         <div id="ticket-content-replied" class="ticket-content-pane">
                             <div class="admin-table-wrapper">
-                                <table class="admin-table"><thead><tr><th>Người gửi</th><th>Thời gian</th><th>Trạng thái</th><th>Hành động</th></tr></thead><tbody id="admin-ticket-replied-tbody"></tbody></table>
+                                <table class="admin-table"><thead><tr><th style="width: 50px; text-align: center;"><input type="checkbox" class="admin-table-checkbox" onclick="toggleAllTickets(this, 'replied')"></th><th>Người gửi</th><th>Thời gian</th><th>Trạng thái</th><th>Hành động</th></tr></thead><tbody id="admin-ticket-replied-tbody"></tbody></table>
                             </div>
                         </div>
                     </div>
