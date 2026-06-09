@@ -175,6 +175,7 @@ mongoose.connect(dbURI)
             
             // TÍNH NĂNG THÊM PHIM MỚI TỰ ĐỘNG (KHÔNG LÀM MẤT VIEW/LIKE CŨ)
             const newMoviesToAdd = [
+                ["Nữ Cấp Trên Của Tôi", "https://i.postimg.cc/pVST42Cw/gen.jpg", "https://files.catbox.moe/9qigdx.MP3", "https://files.catbox.moe/h0a1rp.MP3", "https://files.catbox.moe/cz7ww7.MP3"],
                 ["Mối Tình Đầu Của Bạn Gái", "https://i.postimg.cc/DZtXVDXW/gen.jpg", "https://files.catbox.moe/1hpgi1.MP3", "https://files.catbox.moe/i74fap.MP3", "https://files.catbox.moe/decim5.MP3", "https://files.catbox.moe/dns394.MP3"],
                 ["bạn gái nghĩ tôi nghèo", "https://i.postimg.cc/rF486Ww9/gen.jpg", "https://files.catbox.moe/uxy8kr.MP3", "https://files.catbox.moe/gzwzk5.MP3", "https://files.catbox.moe/q4ss9f.MP3", "https://files.catbox.moe/yewt65.MP3"],
                 ["em người yêu sợ hãi", "https://i.postimg.cc/q7p689fW/gen.jpg", "https://files.catbox.moe/smswpp.MP3", "https://files.catbox.moe/kp4oqj.MP3", "https://files.catbox.moe/x8yhws.MP3"],
