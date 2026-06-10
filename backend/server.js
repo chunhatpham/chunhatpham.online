@@ -175,6 +175,7 @@ mongoose.connect(dbURI)
             
             // TÍNH NĂNG THÊM PHIM MỚI TỰ ĐỘNG (KHÔNG LÀM MẤT VIEW/LIKE CŨ)
             const newMoviesToAdd = [
+                ["bạn gái muốn hoàn trả tiền", "https://i.postimg.cc/prqJbZRN/gen.jpg", "https://files.catbox.moe/3460tp.MP3", "https://files.catbox.moe/bzgjp9.MP3", "https://files.catbox.moe/k0wxo5.MP3"],
                 ["gửi em trai cho bạn thân", "https://i.postimg.cc/8PTBJn1N/gen.jpg", "https://files.catbox.moe/wipm0p.MP3", "https://files.catbox.moe/d69ic6.MP3", "https://files.catbox.moe/pna17o.MP3", "https://files.catbox.moe/bb9ryp.MP3"],
                 ["cô ấy xem thường thân phận tôi", "https://i.postimg.cc/8P5861kB/gen.jpg", "https://files.catbox.moe/zyozj8.MP3", "https://files.catbox.moe/iqj8s5.MP3", "https://files.catbox.moe/nvkmay.MP3", "https://files.catbox.moe/6m1d4m.MP3"],
                 ["Nữ Cấp Trên Của Tôi", "https://i.postimg.cc/pVST42Cw/gen.jpg", "https://files.catbox.moe/9qigdx.MP3", "https://files.catbox.moe/h0a1rp.MP3", "https://files.catbox.moe/cz7ww7.MP3"],
