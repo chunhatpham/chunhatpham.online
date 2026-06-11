@@ -1351,6 +1351,21 @@ window.submitSupportTicket = async function() {
     let currentUser = JSON.parse(localStorage.getItem('cnp_current_user'));
     if(!currentUser) { showNotification('warning', 'Yêu cầu', 'Bạn cần đăng nhập để gửi phiếu hỗ trợ!', 'Đăng nhập'); return; }
 
+    // --- BẢO VỆ TẦNG 1: TRÁNH SPAM BĂNG THÔNG BẰNG LOCALSTORAGE ---
+    const COOLDOWN_MINUTES = 30;
+    const cooldownMs = COOLDOWN_MINUTES * 60 * 1000;
+    const lastSubmitTime = localStorage.getItem('cnp_last_support_time_' + currentUser.username);
+
+    if (lastSubmitTime) {
+        const timePassed = Date.now() - parseInt(lastSubmitTime);
+        if (timePassed < cooldownMs) {
+            const remainingMinutes = Math.ceil((cooldownMs - timePassed) / (60 * 1000));
+            showNotification('warning', 'Thao Tác Quá Nhanh', `Bạn vừa gửi một phiếu hỗ trợ gần đây. Vui lòng đợi ${remainingMinutes} phút nữa để gửi phiếu tiếp theo nhé!`, 'Đã hiểu');
+            return; // Dừng ngay lập tức, không cho phép chạy API
+        }
+    }
+    // ---------------------------------------------------------------
+
     let name = document.getElementById('support-name').value; 
     let email = document.getElementById('support-email').value; 
     let content = document.getElementById('support-content').value; 
@@ -1375,6 +1390,7 @@ window.submitSupportTicket = async function() {
                 body: JSON.stringify({ username: currentUser.username, name, email, content, image: base64Image })
             });
             if(res.ok) {
+                localStorage.setItem('cnp_last_support_time_' + currentUser.username, Date.now()); // Lưu thời gian gửi thành công
                 showNotification('success', 'Gửi Thành Công', 'Phiếu hỗ trợ đã được gửi. Chúng tôi sẽ phản hồi sớm nhất!', 'Đóng'); 
                 document.getElementById('support-name').value = ''; document.getElementById('support-email').value = ''; document.getElementById('support-content').value = ''; imgInput.value = ''; window.updateFileName(imgInput); 
             } else {
