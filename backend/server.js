@@ -175,6 +175,8 @@ mongoose.connect(dbURI)
             
             // TÍNH NĂNG THÊM PHIM MỚI TỰ ĐỘNG (KHÔNG LÀM MẤT VIEW/LIKE CŨ)
             const newMoviesToAdd = [
+                ["kết hôn với công chúa kinh thành", "https://i.postimg.cc/650B8G3m/gen.jpg", "https://files.catbox.moe/qosspu.MP3", "https://files.catbox.moe/wsljlz.MP3", "https://files.catbox.moe/3cve8w.MP3"],
+                ["tôi lại có em bé rồi", "https://i.postimg.cc/QxLFQ5jB/gen.jpg", "https://files.catbox.moe/qu4e3l.MP3", "https://files.catbox.moe/emn2ya.MP3", "https://files.catbox.moe/mfyz8o.MP3"],
                 ["chiến tranh đại chiến với vợ", "https://i.postimg.cc/Dw3LSGMr/gen.jpg", "https://files.catbox.moe/oxx5vy.MP3", "https://files.catbox.moe/6eus4v.MP3", "https://files.catbox.moe/lpm069.MP3", "https://files.catbox.moe/w2cfbt.MP3"],
                 ["cô ấy không tin tôi rồi", "https://i.postimg.cc/y8GpmWCT/gen.jpg", "https://files.catbox.moe/czmkpr.MP3", "https://files.catbox.moe/z1pnil.MP3", "https://files.catbox.moe/wt8jvj.MP3"],
                 ["bạn gái muốn hoàn trả tiền", "https://i.postimg.cc/prqJbZRN/gen.jpg", "https://files.catbox.moe/3460tp.MP3", "https://files.catbox.moe/bzgjp9.MP3", "https://files.catbox.moe/k0wxo5.MP3"],
