@@ -1135,6 +1135,4 @@ const server = app.listen(PORT, () => {
         console.error(`\n🔴 LỖI NGHIÊM TRỌNG: Cổng ${PORT} đang bị chiếm dụng!\n👉 NGUYÊN NHÂN: Bạn đang mở 2 Terminal cùng chạy Server một lúc.\n👉 CÁCH SỬA: Hãy TẮT HOÀN TOÀN phần mềm VS Code đi, sau đó mở lại, bật 1 Terminal duy nhất và gõ 'node server.js'\n`);
         process.exit(1);
     }
-});/ /   c a p   n h a t   p h i m   m o i 
- 
- 
+});
